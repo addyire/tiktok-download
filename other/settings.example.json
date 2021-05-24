@@ -11,7 +11,9 @@
     },
     "compression": {
         "max_size": 8388119,
-        "audio_bitrate": 64
+        "audio_bitrate": 64,
+        "restrict": false,
+        "servers": ["Put server ID's in here for servers WITH compression. This is ignored unless restrict is enabled."]
     },
     "status": "/help",
     "version": "3.0",

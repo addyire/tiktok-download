@@ -17,7 +17,7 @@ const basePath = path.join(__dirname, '..', relativeDownloadPath)
 const DISCORD_MAX_SIZE = compression.max_size
 const AUDIO_BITRATE = compression.audio_bitrate
 
-function downloadTikTok (videoURL, status) {
+function downloadTikTok (videoURL, status, guildID) {
   const videoID = Math.random().toString(36).substr(7)
   let returnInfo
 
@@ -34,6 +34,11 @@ function downloadTikTok (videoURL, status) {
       const videoSize = fs.statSync(returnInfo.videoPath).size
 
       if (videoSize > DISCORD_MAX_SIZE) {
+        if (!hasCompression(guildID)) {
+          log.info('Compression failed because server is not permitted.')
+          throw new Error('Video file too large and compression is not enabled on this server.')
+        }
+
         updateStatus(status, 2)
         const start = new Date().getTime()
 
@@ -79,7 +84,11 @@ function downloadTikTok (videoURL, status) {
         }
         resolve(returnInfo)
       }
-    }).catch(reject)
+    }).catch(err => {
+      if (typeof err === 'string') {
+        reject(new Error(err))
+      } else reject(err)
+    })
   })
 }
 
@@ -112,6 +121,11 @@ function updateStatus (status, state) {
         { name: ':white_check_mark: Compressed', value: 'Complete!', inline: true }
       ]
       break
+    case 4:
+      status.videoStatus.fields = [
+        { name: ':white_check_mark: Downloaded', value: 'Complete!', inline: true },
+        { name: ':white_check_mark: Compressed', value: ':x: Not Permitted :x:', inline: true }
+      ]
   }
 
   if (status) {
@@ -154,6 +168,12 @@ function download (url, options, filePath) {
 
     request.end()
   })
+}
+
+function hasCompression (guildID) {
+  if (!compression.restrict) return true
+  if (compression.servers.indexOf(guildID) !== -1) return true
+  return false
 }
 
 module.exports = {

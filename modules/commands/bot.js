@@ -2,23 +2,25 @@ const Discord = require('discord.js')
 const { SlashCommand } = require('slash-create')
 
 const { owner } = require('../../other/settings.json')
-const client = require('../../bot')
 
 module.exports = class Progress extends SlashCommand {
-  constructor (creator) {
+  constructor (client, creator) {
     super(creator, {
       name: 'bot',
       guildIDs: [owner.server],
       description: 'Display bot analytics'
     })
+    this.client = client
   }
+
+  onError () {}
 
   async run (interaction) {
     if (interaction.user.id !== owner.id) {
       throw new Error('You do not have permission to use this command!')
     }
 
-    const serverData = client.guilds.cache.reduce((acc, server) => {
+    const serverData = this.client.guilds.cache.reduce((acc, server) => {
       if (server.id === '110373943822540800') return acc
       return {
         servers: acc.servers + 1,

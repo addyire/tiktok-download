@@ -1,12 +1,11 @@
 const Discord = require('discord.js')
 const { SlashCommand } = require('slash-create')
 
-const client = require('../../bot')
 const add = require('../counter')
 const ServerOptions = require('../mongo')
 
 module.exports = class Progress extends SlashCommand {
-  constructor (creator) {
+  constructor (client, creator) {
     super(creator, {
       name: 'setcolor',
       description: 'Change the sidebar color',
@@ -19,10 +18,13 @@ module.exports = class Progress extends SlashCommand {
         }
       ]
     })
+    this.client = client
   }
 
+  onError () {}
+
   async run (interaction) {
-    const hasPerms = (await client.guilds.cache.get(interaction.guildID).members.fetch(interaction.user.id)).hasPermission('ADMINISTRATOR')
+    const hasPerms = (await this.client.guilds.cache.get(interaction.guildID).members.fetch(interaction.user.id)).hasPermission('ADMINISTRATOR')
 
     if (!hasPerms) {
       throw new Error('You must have the ADMINISTRATOR permission to change settings.')
@@ -36,6 +38,7 @@ module.exports = class Progress extends SlashCommand {
       return a
     }, {})
 
+    console.log(serverOptions)
     serverOptions.color = args.color
 
     await serverOptions.validate()

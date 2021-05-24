@@ -6,7 +6,7 @@ const { TikTokParser } = require('../tiktok')
 const add = require('../counter')
 
 module.exports = class Progress extends SlashCommand {
-  constructor (creator) {
+  constructor (client, creator) {
     super(creator, {
       name: 'tiktok',
       description: 'Downloads a TikTok',
@@ -21,12 +21,14 @@ module.exports = class Progress extends SlashCommand {
     })
   }
 
+  onError () {}
+
   async run (interaction) {
     add('interactions')
 
     await interaction.defer()
 
-    const serverOptions = await ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true })
+    const serverOptions = ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true })
     const serverDetails = serverOptions.details
 
     const args = interaction.data.data.options.reduce((a, b) => {
@@ -34,7 +36,7 @@ module.exports = class Progress extends SlashCommand {
       return a
     }, {})
 
-    const videoData = await TikTokParser(args.url)
+    const videoData = await TikTokParser(args.url, undefined, interaction.guildID)
     const response = {
       file: {
         name: 'tiktok.mp4',
@@ -55,9 +57,6 @@ module.exports = class Progress extends SlashCommand {
               icon_url: videoData.authorMeta.avatar
             }
           : undefined,
-        // thumbnail: {
-        //     url: thumbnail
-        // },
         footer: serverDetails.requester
           ? {
               text: `Requested by ${interaction.user.username}#${interaction.user.discriminator}`,

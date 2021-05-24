@@ -3,18 +3,20 @@ const { SlashCommand } = require('slash-create')
 
 const ServerOptions = require('../mongo')
 const add = require('../counter')
-const client = require('../../bot')
 
 module.exports = class Progress extends SlashCommand {
-  constructor (creator) {
+  constructor (client, creator) {
     super(creator, {
       name: 'settings',
       description: 'Displays the current server settings.'
     })
+    this.client = client
   }
 
+  onError () {}
+
   async run (interaction) {
-    const hasPerms = (await client.guilds.cache.get(interaction.guildID).members.fetch(interaction.user.id)).hasPermission('ADMINISTRATOR')
+    const hasPerms = (await (await this.client.guilds.fetch(interaction.guildID)).members.fetch(interaction.user.id)).hasPermission('ADMINISTRATOR')
 
     if (!hasPerms) {
       throw new Error('You must have the ADMINISTRATOR permission to view settings.')
@@ -22,7 +24,7 @@ module.exports = class Progress extends SlashCommand {
 
     add('interactions')
 
-    const serverOptions = await ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true })
+    const serverOptions = ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true })
 
     // Create embed
     const e = new Discord.MessageEmbed()
@@ -31,7 +33,7 @@ module.exports = class Progress extends SlashCommand {
 
     const data = serverOptions.toObject()
 
-    // Deleete db stuff
+    // Delete db stuff
     delete data._id
     delete data.serverID
     delete data.__v

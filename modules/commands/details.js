@@ -1,12 +1,11 @@
 const Discord = require('discord.js')
 const { SlashCommand } = require('slash-create')
 
-const client = require('../../bot')
 const ServerOptions = require('../mongo')
 const add = require('../counter')
 
 module.exports = class Details extends SlashCommand {
-  constructor (creator) {
+  constructor (client, creator) {
     super(creator, {
       name: 'details',
       description: 'Change what video details to show.',
@@ -49,10 +48,13 @@ module.exports = class Details extends SlashCommand {
         }
       ]
     })
+    this.client = client
   }
 
+  onError () {}
+
   async run (interaction) {
-    const hasPerms = (await client.guilds.cache.get(interaction.guildID).members.fetch(interaction.user.id)).hasPermission('ADMINISTRATOR')
+    const hasPerms = (await this.client.guilds.cache.get(interaction.guildID).members.fetch(interaction.user.id)).hasPermission('ADMINISTRATOR')
 
     if (!hasPerms) {
       throw new Error('You must have the ADMINISTRATOR permission to change settings.')
@@ -60,7 +62,7 @@ module.exports = class Details extends SlashCommand {
 
     add('interactions')
 
-    const serverOptions = await ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true })
+    const serverOptions = ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true })
     const args = interaction.data.data.options.reduce((a, b) => {
       a[b.name] = b.value
       return a

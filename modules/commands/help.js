@@ -6,17 +6,19 @@ const { owner, version, inviteURL } = require('../../other/settings.json')
 const add = require('../counter')
 
 module.exports = class Progress extends SlashCommand {
-  constructor (creator) {
+  constructor (client, creator) {
     super(creator, {
       name: 'help',
       description: 'Displays helpful information'
     })
   }
 
+  onError () {}
+
   async run (interaction) {
     add('interactions')
 
-    const serverOptions = await ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true })
+    const serverOptions = ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true })
 
     const e = new Discord.MessageEmbed()
       .setTitle('Invite TokTik Downloader')

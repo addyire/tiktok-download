@@ -1,17 +1,18 @@
 <div align="center">
     <img src="./other/readme/logo.png" height=150><br>
-    <img alt="Discord" src="https://img.shields.io/discord/792286443660771359?logo=discord">
+Discord bot that automatically downloads TikToks<br>
+    <a href="https://discord.gg/D7SsERdD4M"><img alt="Discord" src="https://img.shields.io/discord/792286443660771359?logo=discord"></a>
     <a href="https://discord.com/oauth2/authorize?client_id=819836629250080779&scope=bot&permissions=11264"><img src="https://img.shields.io/badge/servers-99%2B-green"></a>
 
-    Discord bot that automatically downloads TikToks
+
 
 </div>
 
 ## Features
 
-- Easy to use
+- Compression
 - Configurable
-- Compresses videos when file is too large for Discord
+- Easy to use
 
 ## Invite
 
@@ -38,5 +39,3 @@ npm install
 ```
 2. Create a `other/settings.json` file using the `settings.example.json` as reference.
 3. Run with `npm start`
-
-Note: Some videos may require compression to be sent. This is a very CPU intensive task. Currently this feature can not be disabled but will be added in a future release.

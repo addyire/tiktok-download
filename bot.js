@@ -2,6 +2,7 @@ const { SlashCreator, GatewayServer } = require('slash-create')
 const path = require('path')
 const Discord = require('discord.js')
 const mongoose = require('mongoose')
+const fs = require('fs')
 
 const { TikTokParser } = require('./modules/tiktok')
 const ServerSettings = require('./modules/mongo')
@@ -20,13 +21,12 @@ const creator = new SlashCreator({
 
 creator
   .withServer(new GatewayServer(handler => client.ws.on('INTERACTION_CREATE', handler)))
-  .registerCommandsIn(path.join(__dirname, 'modules', 'commands'))
-  .syncCommands()
-
-module.exports = client
+  .registerCommands(fs.readdirSync(path.join(__dirname, 'modules', 'commands')).map(file => {
+    return new (require(`./modules/commands/${file}`))(client, creator)
+  }))
 
 creator.on('commandError', async (command, error, interaction) => {
-  log.error(error)
+  console.log(error)
 
   let reason = ''
 
@@ -125,7 +125,8 @@ client.on('message', async message => {
 
   log.info(`Got request for video: ${tiktok}`)
 
-  const videoData = await TikTokParser(tiktok, { statusMessage, videoStatus }).catch(err => {
+  const videoData = await TikTokParser(tiktok, { statusMessage, videoStatus }, message.guild.id).catch(err => {
+    console.log(err)
     channel.send(new Discord.MessageEmbed()
       .setTitle(err.message)
       .setColor(guildOptions.color)
@@ -197,5 +198,7 @@ function getTikTokFromStr (msg) {
 
   return undefined
 }
+
+module.exports = client
 
 client.login(bot.token)

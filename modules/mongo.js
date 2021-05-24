@@ -1,6 +1,8 @@
 const mongoose = require('mongoose')
 
-mongoose.connect('mongodb://localhost/toktik', { useNewUrlParser: true })
+const { mongo } = require('../other/settings.json')
+
+mongoose.connect(mongo, { useNewUrlParser: true })
 
 const colorValidator = (v) => (/^#([0-9a-f]{3}){1,2}$/i).test(v)
 

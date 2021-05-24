@@ -105,3 +105,6 @@ dist
 #Settings
 settings.json
 metrics.json
+
+#Leftover tiktoks
+other/downloads/*
