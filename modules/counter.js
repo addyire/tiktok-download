@@ -1,7 +1,7 @@
 const fs = require('fs')
 const path = require('path')
 
-const fp = path.join(__dirname, '..', 'options', 'metrics.json')
+const fp = path.join(__dirname, '..', 'other', 'metrics.json')
 
 const data = require(fp)
 

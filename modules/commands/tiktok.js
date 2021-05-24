@@ -1,9 +1,9 @@
 const { SlashCommand } = require('slash-create')
 const fs = require('fs')
 
-const ServerOptions = require('../modules/mongo')
-const { TikTokParser } = require('../modules/tiktok')
-const add = require('../modules/counter')
+const ServerOptions = require('../mongo')
+const { TikTokParser } = require('../tiktok')
+const add = require('../counter')
 
 module.exports = class Progress extends SlashCommand {
   constructor (creator) {

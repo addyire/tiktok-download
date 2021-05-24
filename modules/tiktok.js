@@ -10,9 +10,10 @@ const fs = require('fs')
 const path = require('path')
 
 const add = require('./counter')
-const { compression } = require('../options/settings.json')
+const { compression, relativeDownloadPath } = require('../other/settings.json')
 const log = require('./log')
 
+const basePath = path.join(__dirname, '..', relativeDownloadPath)
 const DISCORD_MAX_SIZE = compression.max_size
 const AUDIO_BITRATE = compression.audio_bitrate
 
@@ -26,7 +27,7 @@ function downloadTikTok (videoURL, status) {
 
       const headers = videoMeta.headers
       returnInfo = videoMeta.collector[0]
-      returnInfo.videoPath = path.join(__dirname, '..', 'downloads', `${videoID}.mp4`)
+      returnInfo.videoPath = path.join(basePath, `${videoID}.mp4`)
 
       return download(returnInfo.videoUrl, { headers }, returnInfo.videoPath)
     }).then(() => {
@@ -39,7 +40,7 @@ function downloadTikTok (videoURL, status) {
         log.info(`Video size is ${videoSize}. Compression required.`)
 
         const oldPath = returnInfo.videoPath
-        const newVideoPath = path.join(__dirname, '..', 'downloads', `${videoID}c.mp4`) // TODO make downloads path a setting
+        const newVideoPath = path.join(basePath, `${videoID}c.mp4`) // TODO make downloads path a setting
         const videoLength = returnInfo.videoMeta.duration
         const wantedSize = DISCORD_MAX_SIZE * 0.8
         const videoBitRate = ((wantedSize / 128) / videoLength) - AUDIO_BITRATE

@@ -3,19 +3,10 @@ const path = require('path')
 const Discord = require('discord.js')
 const mongoose = require('mongoose')
 
-module.exports = client
-
-creator
-.withServer(new GatewayServer(handler => client.ws.on('INTERACTION_CREATE', handler)))
-.registerCommandsIn(path.join(__dirname, 'commands'))
-.syncCommands()
-
 const { TikTokParser } = require('./modules/tiktok')
 const ServerSettings = require('./modules/mongo')
-const { tiktokStarters, bot, status, owner } = require('./options/settings.json')
+const { tiktokStarters, bot, status, owner } = require('./other/settings.json')
 const log = require('./modules/log')
-
-const TIKTOK_STARTERS = tiktokStarters
 
 let serverCount = 0
 let memberCount = 0
@@ -26,6 +17,13 @@ const creator = new SlashCreator({
   publicKey: bot.public_key,
   token: bot.token
 })
+
+creator
+  .withServer(new GatewayServer(handler => client.ws.on('INTERACTION_CREATE', handler)))
+  .registerCommandsIn(path.join(__dirname, 'modules', 'commands'))
+  .syncCommands()
+
+module.exports = client
 
 creator.on('commandError', async (command, error, interaction) => {
   log.error(error)
@@ -192,7 +190,7 @@ client.on('message', async message => {
 
 function getTikTokFromStr (msg) {
   for (const element of msg.split(' ')) {
-    for (const starter of TIKTOK_STARTERS) {
+    for (const starter of tiktokStarters) {
       if (element.startsWith(starter)) return element
     }
   }

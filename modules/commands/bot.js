@@ -1,8 +1,8 @@
 const Discord = require('discord.js')
 const { SlashCommand } = require('slash-create')
 
-const { owner } = require('../options/settings.json')
-const client = require('../bot')
+const { owner } = require('../../other/settings.json')
+const client = require('../../bot')
 
 module.exports = class Progress extends SlashCommand {
   constructor (creator) {

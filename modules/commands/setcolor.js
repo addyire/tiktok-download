@@ -1,9 +1,9 @@
 const Discord = require('discord.js')
 const { SlashCommand } = require('slash-create')
 
-const client = require('../bot')
-const add = require('../modules/counter')
-const ServerOptions = require('../modules/mongo')
+const client = require('../../bot')
+const add = require('../counter')
+const ServerOptions = require('../mongo')
 
 module.exports = class Progress extends SlashCommand {
   constructor (creator) {
