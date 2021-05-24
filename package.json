@@ -1,0 +1,25 @@
+{
+  "name": "tiktok-download-2",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^12.5.3",
+    "ffmpeg-static": "^4.3.0",
+    "fluent-ffmpeg": "^2.1.2",
+    "mongoose": "^5.12.10",
+    "slash-create": "^3.1.0",
+    "tiktok-scraper": "^1.4.23",
+    "winston": "^3.3.3"
+  },
+  "devDependencies": {
+    "eslint": "^7.27.0",
+    "eslint-config-standard": "^16.0.2",
+    "eslint-plugin-import": "^2.23.3",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.3.1"
+  },
+  "scripts": {
+    "start": "node bot.js"
+  }
+}
