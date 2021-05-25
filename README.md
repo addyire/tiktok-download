@@ -28,7 +28,7 @@ There are a few commands that allow you to configure the bot.
 - /progress
 - /setcolor
 - /settings
-
+- /bot <= owner only command
 ## Running
 
 1. Run the following commands
