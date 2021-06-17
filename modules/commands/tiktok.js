@@ -28,7 +28,7 @@ module.exports = class Progress extends SlashCommand {
 
     await interaction.defer()
 
-    const serverOptions = ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true })
+    const serverOptions = await ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true })
     const serverDetails = serverOptions.details
 
     const args = interaction.data.data.options.reduce((a, b) => {

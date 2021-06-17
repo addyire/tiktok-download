@@ -20,6 +20,5 @@
     "helplink": "link for help. like a discord",
     "mongo": "mongodb://mongo server address:mongo server port/mongo database name",
     "relativeDownloadPath": "other/downloads",
-    "inviteURL": "invite link",
     "tiktokStarters":  ["https://vm.tiktok.com/", "http://vm.tiktok.com/", "https://www.tiktok.com/", "http://www.tiktok.com/", "https://m.tiktok.com/v/", "http://m.tiktok.com/v/"]
 }

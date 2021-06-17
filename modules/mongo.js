@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 
 const { mongo } = require('../other/settings.json')
 
-mongoose.connect(mongo, { useNewUrlParser: true })
+mongoose.connect(mongo, { useNewUrlParser: true, useUnifiedTopology: true })
 
 const colorValidator = (v) => (/^#([0-9a-f]{3}){1,2}$/i).test(v)
 

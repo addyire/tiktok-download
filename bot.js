@@ -24,6 +24,7 @@ creator
   .registerCommands(fs.readdirSync(path.join(__dirname, 'modules', 'commands')).map(file => {
     return new (require(`./modules/commands/${file}`))(client, creator)
   }))
+  .syncCommands()
 
 creator.on('commandError', async (command, error, interaction) => {
   console.log(error)
@@ -53,6 +54,7 @@ creator.on('commandError', async (command, error, interaction) => {
 
 client.on('ready', () => {
   log.info('Bot ready!')
+  log.info(`Invite Link: ${require('./modules/invite')}`)
 
   client.guilds.cache.forEach((item) => {
     if (item.id === '110373943822540800') return
@@ -76,23 +78,16 @@ client.on('guildCreate', member => {
   memberCount += member.memberCount
 
   log.info(`Joined a new server! Now I am in ${serverCount} servers`)
-
-  client.users.fetch(owner.id).then(usr => {
-    usr.send(`I just joined the server: "${member.name}". It has ${member.memberCount} users!\nServer Count: ${serverCount}`)
-  }).catch(err => console.error(err + ' join error'))
 })
 
 client.on('guildDelete', server => {
-  // TODO delete item from mongoose when leave
-
   serverCount -= 1
   memberCount -= server.memberCount
 
   log.info(`Got removed from a server! Now I am in ${serverCount} servers`)
 
-  client.users.fetch(owner.id).then(usr => {
-    usr.send(`I was just removed from: "${server.name}" which had ${server.memberCount} users.\nServer Count: ${serverCount}`)
-  }).catch(err => console.error(err + ' remove error'))
+  // TODO delete item from mongoose when leave
+  ServerSettings.findOneAndDelete({ serverID: server.id })
 })
 
 client.on('message', async message => {
