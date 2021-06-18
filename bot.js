@@ -26,7 +26,7 @@ creator
   }))
 
 creator.on('commandError', async (command, error, interaction) => {
-  console.log(error)
+  log.warn(error)
 
   let reason = ''
 
@@ -39,7 +39,7 @@ creator.on('commandError', async (command, error, interaction) => {
     reason = error.message
   }
 
-  const serverOptions = await ServerSettings.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true })
+  const serverOptions = await ServerSettings.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true, useFindAndModify: true })
 
   const e = new Discord.MessageEmbed()
     .setTitle(':rotating_light: Error')
@@ -104,7 +104,7 @@ client.on('message', async message => {
   if (tiktok === undefined) return
 
   const channel = message.channel.permissionsFor(client.user).has('SEND_MESSAGES') ? message.channel : message.author
-  const guildOptions = await ServerSettings.findOneAndUpdate({ serverID: message.guild.id }, {}, { upsert: true, new: true, setDefaultsOnInsert: true })
+  const guildOptions = await ServerSettings.findOneAndUpdate({ serverID: message.guild.id }, {}, { upsert: true, new: true, setDefaultsOnInsert: true, useFindAndModify: true })
 
   if (!guildOptions.autodownload.enabled) return
 
@@ -126,7 +126,6 @@ client.on('message', async message => {
   log.info(`Got request for video: ${tiktok}`)
 
   const videoData = await TikTokParser(tiktok, { statusMessage, videoStatus }, message.guild.id).catch(err => {
-    console.log(err)
     channel.send(new Discord.MessageEmbed()
       .setTitle(err.message)
       .setColor(guildOptions.color)

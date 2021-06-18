@@ -24,7 +24,7 @@ module.exports = class Progress extends SlashCommand {
 
     add('interactions')
 
-    const serverOptions = ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true })
+    const serverOptions = await ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true, useFindAndModify: true })
 
     // Create embed
     const e = new Discord.MessageEmbed()

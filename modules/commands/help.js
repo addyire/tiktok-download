@@ -18,7 +18,7 @@ module.exports = class Progress extends SlashCommand {
   async run (interaction) {
     add('interactions')
 
-    const serverOptions = ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true })
+    const serverOptions = await ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true, useFindAndModify: true })
 
     const e = new Discord.MessageEmbed()
       .setTitle('Invite TokTik Downloader')

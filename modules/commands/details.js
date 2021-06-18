@@ -62,7 +62,7 @@ module.exports = class Details extends SlashCommand {
 
     add('interactions')
 
-    const serverOptions = ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true })
+    const serverOptions = await ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true, useFindAndModify: true })
     const args = interaction.data.data.options.reduce((a, b) => {
       a[b.name] = b.value
       return a
