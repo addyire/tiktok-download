@@ -5,7 +5,7 @@ const ServerOptions = require('../mongo')
 const add = require('../counter')
 const inviteURL = require('../invite')
 
-module.exports = class Progress extends SlashCommand {
+module.exports = class Settings extends SlashCommand {
   constructor (client, creator) {
     super(creator, {
       name: 'settings',
@@ -22,7 +22,7 @@ module.exports = class Progress extends SlashCommand {
     try {
       hasPerms = (await this.client.guilds.cache.get(interaction.guildID).members.fetch(interaction.user.id)).hasPermission('ADMINISTRATOR')
     } catch (err) {
-      throw new Error(`I am not in this server as a bot. Please have an administrator click [this](${inviteURL}) link to invite me properly.`)
+      throw new Error(`I am not in this server as a bot. Please have an administrator click [this](${inviteURL}) link to invite me.`)
     }
 
     if (!hasPerms) {

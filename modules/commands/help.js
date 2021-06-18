@@ -5,12 +5,13 @@ const ServerOptions = require('../mongo')
 const { owner, version, inviteURL } = require('../../other/settings.json')
 const add = require('../counter')
 
-module.exports = class Progress extends SlashCommand {
+module.exports = class Help extends SlashCommand {
   constructor (client, creator) {
     super(creator, {
       name: 'help',
       description: 'Displays helpful information'
     })
+    this.client = client
   }
 
   onError () {}
@@ -26,7 +27,7 @@ module.exports = class Progress extends SlashCommand {
       .setDescription("This bot automagically replaces TikTok URL's with a MP4 file so you don't have to leave discord to watch it. \n*If you are being DM'd responses to commands make sure the bot has sufficient permissions to send messages in ALL channels.*")
       .addFields({
         name: 'Usage',
-        value: 'If enabled, you can just send a TikTok and the bot will download it. To enabled/disable this use the /autodownload command.'
+        value: 'If autodownload is enabled, you can just send a TikTok and the bot will download it. To enabled/disable this use the /autodownload command.'
       }, {
         name: 'Commands',
         value: 'Type / and click on the TokTik icon to see all the available commands!'

@@ -30,7 +30,6 @@ module.exports = class Progress extends SlashCommand {
 
     const data = require('../../other/metrics.json')
 
-    
     const e = new Discord.MessageEmbed()
       .setTitle(':bar_chart: Bot Information')
       .addFields({

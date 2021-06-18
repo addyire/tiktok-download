@@ -5,7 +5,7 @@ const ServerOptions = require('../mongo')
 const { TikTokParser } = require('../tiktok')
 const add = require('../counter')
 
-module.exports = class Progress extends SlashCommand {
+module.exports = class TikTok extends SlashCommand {
   constructor (client, creator) {
     super(creator, {
       name: 'tiktok',
