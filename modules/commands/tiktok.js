@@ -2,7 +2,7 @@ const { SlashCommand } = require('slash-create')
 const fs = require('fs')
 
 const ServerOptions = require('../mongo')
-const { TikTokParser } = require('../tiktok')
+const TikTokParser = require('../tiktok')
 const add = require('../counter')
 
 module.exports = class Progress extends SlashCommand {
@@ -36,45 +36,48 @@ module.exports = class Progress extends SlashCommand {
       return a
     }, {})
 
-    const videoData = await TikTokParser(args.url, undefined, interaction.guildID)
-    const response = {
-      file: {
-        name: 'tiktok.mp4',
-        file: fs.readFileSync(videoData.videoPath)
+    TikTokParser(args.url, undefined, interaction.guildID).then(videoData => {
+      const response = {
+        file: {
+          name: 'tiktok.mp4',
+          file: fs.readFileSync(videoData.videoPath)
+        }
       }
-    }
 
-    if (serverDetails.enabled) {
-      response.embeds = [{
-        title: serverDetails.link ? 'View On TikTok' : undefined,
-        description: serverDetails.description ? videoData.text : undefined,
-        timestamp: serverDetails.requester ? new Date().toISOString() : undefined,
-        color: parseInt(serverOptions.color.substring(1), 16),
-        url: serverDetails.link ? args.url : undefined,
-        author: serverDetails.author
-          ? {
-              name: `${videoData.authorMeta.nickName} (${videoData.authorMeta.name})`,
-              icon_url: videoData.authorMeta.avatar
-            }
-          : undefined,
-        footer: serverDetails.requester
-          ? {
-              text: `Requested by ${interaction.user.username}#${interaction.user.discriminator}`,
-              icon_url: interaction.user.avatarURL
-            }
-          : undefined,
-        fields: serverDetails.analytics
-          ? [
-              { name: ':arrow_forward: Plays', value: videoData.playCount, inline: true },
-              { name: ':speech_left: Comments', value: videoData.commentCount, inline: true },
-              { name: ':mailbox_with_mail: Shares', value: videoData.shareCount, inline: true }
-            ]
-          : undefined
-      }]
-    }
+      if (serverDetails.enabled) {
+        response.embeds = [{
+          title: serverDetails.link ? 'View On TikTok' : undefined,
+          description: serverDetails.description ? videoData.text : undefined,
+          timestamp: serverDetails.requester ? new Date().toISOString() : undefined,
+          color: parseInt(serverOptions.color.substring(1), 16),
+          url: serverDetails.link ? args.url : undefined,
+          author: serverDetails.author
+            ? {
+                name: `${videoData.authorMeta.nickName} (${videoData.authorMeta.name})`,
+                icon_url: videoData.authorMeta.avatar
+              }
+            : undefined,
+          footer: serverDetails.requester
+            ? {
+                text: `Requested by ${interaction.user.username}#${interaction.user.discriminator}`,
+                icon_url: interaction.user.avatarURL
+              }
+            : undefined,
+          fields: serverDetails.analytics
+            ? [
+                { name: ':arrow_forward: Plays', value: videoData.playCount, inline: true },
+                { name: ':speech_left: Comments', value: videoData.commentCount, inline: true },
+                { name: ':mailbox_with_mail: Shares', value: videoData.shareCount, inline: true }
+              ]
+            : undefined
+        }]
+      }
 
-    videoData.purge()
+      // videoData.purge()
 
-    return response
+      return response
+    }).catch(err => {
+      throw err
+    })
   }
 }

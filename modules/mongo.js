@@ -1,11 +1,14 @@
+// Require stuff
 const mongoose = require('mongoose')
-
 const { mongo } = require('../other/settings.json')
 
+// Connect to database
 mongoose.connect(mongo, { useNewUrlParser: true })
 
+// Define a function that checks if a string is a color code
 const colorValidator = (v) => (/^#([0-9a-f]{3}){1,2}$/i).test(v)
 
+// Create the schema
 const serverSchema = new mongoose.Schema({
   details: {
     enabled: {
@@ -64,6 +67,8 @@ const serverSchema = new mongoose.Schema({
   serverID: String
 })
 
+// Load schema
 const Server = mongoose.model('server', serverSchema)
 
+// Export schema
 module.exports = Server
