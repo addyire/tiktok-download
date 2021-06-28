@@ -1,7 +1,7 @@
 {
   "name": "tiktok-download-2",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "bot.js",
   "license": "MIT",
   "dependencies": {
     "discord.js": "^12.5.3",

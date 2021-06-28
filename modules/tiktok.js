@@ -45,10 +45,11 @@ module.exports = (videoURL, status, guildID) => {
       returnInfo = videoMeta.collector[0]
       returnInfo.videoPath = path.join(basePath, `${videoID}.mp4`)
 
-      // Download the video and once finished...
+      log.info('Downloading...')
       return download(returnInfo.videoUrl, { headers }, returnInfo.videoPath)
     }).then(() => {
-      // Get the video size
+      log.info('Download Complete')
+
       const videoSize = fs.statSync(returnInfo.videoPath).size
 
       // If the video is too big to upload to discord

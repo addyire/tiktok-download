@@ -6,8 +6,9 @@ const fs = require('fs')
 
 const TikTokParser = require('./modules/tiktok')
 const ServerSettings = require('./modules/mongo')
-const { tiktokStarters, bot, status, owner } = require('./other/settings.json')
+const { tiktokStarters, bot, status, owner, reinviteMessage } = require('./other/settings.json')
 const log = require('./modules/log')
+const inviteURL = require('./modules/invite')
 
 // Initialize counters
 let serverCount = 0
@@ -27,6 +28,7 @@ creator
   .registerCommands(fs.readdirSync(path.join(__dirname, 'modules', 'commands')).map(file => {
     return new (require(`./modules/commands/${file}`))(client, creator)
   }))
+  .syncCommands()
 
 // Whenever this is a slash-command error run this function...
 creator.on('commandError', async (command, error, interaction) => {
@@ -68,10 +70,22 @@ creator.on('commandError', async (command, error, interaction) => {
 client.on('ready', () => {
   // Log that the bot is ready.
   log.info('Bot ready!')
+  log.info(`Invite Link: ${require('./modules/invite')}`)
 
-  // For each server...
-  client.guilds.cache.forEach((item) => {
-    // If the server ID is a bot-list server then skip
+  const sentMessages = []
+
+  client.guilds.cache.forEach(async (item) => {
+    if (reinviteMessage && !sentMessages.includes(item.ownerID)) {
+      sentMessages.push(item.ownerID)
+
+      const serverOwner = await item.members.fetch(item.ownerID)
+
+      serverOwner.send(new Discord.MessageEmbed()
+        .setTitle('Major Changes To TokTik Download')
+        .setDescription(`Hello, you are getting this message because you are the owner of one or more servers with me in it. If you would like to change settings for me on your server, you must re-invite me to your server using [this](${inviteURL}) link. This is because I now use slash commands which require additional permissions. If you are fine with the default settings, you may ignore this message.`))
+    }
+
+    // If bot-list server then skip
     if (item.id === '110373943822540800') return
 
     // Add to the counters

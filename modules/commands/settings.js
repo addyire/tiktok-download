@@ -3,8 +3,9 @@ const { SlashCommand } = require('slash-create')
 
 const ServerOptions = require('../mongo')
 const add = require('../counter')
+const inviteURL = require('../invite')
 
-module.exports = class Progress extends SlashCommand {
+module.exports = class Settings extends SlashCommand {
   constructor (client, creator) {
     super(creator, {
       name: 'settings',
@@ -16,7 +17,13 @@ module.exports = class Progress extends SlashCommand {
   onError () {}
 
   async run (interaction) {
-    const hasPerms = (await (await this.client.guilds.fetch(interaction.guildID)).members.fetch(interaction.user.id)).hasPermission('ADMINISTRATOR')
+    let hasPerms
+
+    try {
+      hasPerms = (await this.client.guilds.cache.get(interaction.guildID).members.fetch(interaction.user.id)).hasPermission('ADMINISTRATOR')
+    } catch (err) {
+      throw new Error(`I am not in this server as a bot. Please have an administrator click [this](${inviteURL}) link to invite me.`)
+    }
 
     if (!hasPerms) {
       throw new Error('You must have the ADMINISTRATOR permission to view settings.')
@@ -24,8 +31,8 @@ module.exports = class Progress extends SlashCommand {
 
     add('interactions')
 
-    const serverOptions = ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true })
-
+    const serverOptions = await ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true }).exec()
+    console.log(serverOptions)
     // Create embed
     const e = new Discord.MessageEmbed()
       .setTitle('Server Settings')

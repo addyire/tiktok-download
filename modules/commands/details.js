@@ -3,12 +3,13 @@ const { SlashCommand } = require('slash-create')
 
 const ServerOptions = require('../mongo')
 const add = require('../counter')
+const inviteURL = require('../invite')
 
 module.exports = class Details extends SlashCommand {
   constructor (client, creator) {
     super(creator, {
       name: 'details',
-      description: 'Change what video details to show.',
+      description: 'Change what video details to show after sending a TikTok.',
       options: [
         {
           type: 5,
@@ -54,7 +55,13 @@ module.exports = class Details extends SlashCommand {
   onError () {}
 
   async run (interaction) {
-    const hasPerms = (await this.client.guilds.cache.get(interaction.guildID).members.fetch(interaction.user.id)).hasPermission('ADMINISTRATOR')
+    let hasPerms
+
+    try {
+      hasPerms = (await this.client.guilds.cache.get(interaction.guildID).members.fetch(interaction.user.id)).hasPermission('ADMINISTRATOR')
+    } catch (err) {
+      throw new Error(`I am not in this server as a bot. Please have an administrator click [this](${inviteURL}) link to invite me.`)
+    }
 
     if (!hasPerms) {
       throw new Error('You must have the ADMINISTRATOR permission to change settings.')
@@ -62,7 +69,7 @@ module.exports = class Details extends SlashCommand {
 
     add('interactions')
 
-    const serverOptions = ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true })
+    const serverOptions = await ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true })
     const args = interaction.data.data.options.reduce((a, b) => {
       a[b.name] = b.value
       return a
