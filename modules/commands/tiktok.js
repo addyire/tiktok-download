@@ -1,5 +1,6 @@
 const { SlashCommand } = require('slash-create')
 const fs = require('fs')
+const { MessageButton } = require('discord-buttons')
 
 const ServerOptions = require('../mongo')
 const TikTokParser = require('../tiktok')
@@ -71,6 +72,12 @@ module.exports = class TikTok extends SlashCommand {
               ]
             : undefined
         }]
+        response.buttons = serverDetails.link
+        ? [new MessageButton()
+            .setLabel('View On TikTok')
+            .setStyle('url')
+            .setURL(args.url)]
+        : undefined
       }
 
       // videoData.purge()

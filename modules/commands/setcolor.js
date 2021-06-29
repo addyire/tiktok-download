@@ -3,7 +3,7 @@ const { SlashCommand } = require('slash-create')
 
 const add = require('../counter')
 const ServerOptions = require('../mongo')
-const inviteURL = require('../invite')
+const botInviteURL = require('../invite')
 
 module.exports = class SetColor extends SlashCommand {
   constructor (client, creator) {
@@ -30,7 +30,7 @@ module.exports = class SetColor extends SlashCommand {
     try {
       hasPerms = (await this.client.guilds.cache.get(interaction.guildID).members.fetch(interaction.user.id)).hasPermission('ADMINISTRATOR')
     } catch (err) {
-      throw new Error(`I am not in this server as a bot. Please have an administrator click [this](${inviteURL}) link to invite me.`)
+      throw new Error(`I am not in this server as a bot. Please have an administrator click [this](${botInviteURL}) link to invite me.`)
     }
 
     if (!hasPerms) {

@@ -8,7 +8,13 @@ const TikTokParser = require('./modules/tiktok')
 const ServerSettings = require('./modules/mongo')
 const { tiktokStarters, bot, status, owner, reinviteMessage } = require('./other/settings.json')
 const log = require('./modules/log')
-const inviteURL = require('./modules/invite')
+const botInviteURL = require('./modules/invite')
+const { MessageButton } = require('discord-buttons')
+
+// Check to make sure invite URL is a valid link
+if (!/^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w.-]+)+[\w\-._~:/?#[\]@!$&'()*+,;=.]+$/.test(require('./other/settings.json').inviteURL)) {
+  throw new Error('inviteURL must be a valid link')
+}
 
 // Initialize counters
 let serverCount = 0
@@ -16,6 +22,7 @@ let memberCount = 0
 
 // Initialize the bot and slash commands
 const client = new Discord.Client()
+require('discord-buttons')(client)
 const creator = new SlashCreator({
   applicationID: bot.id,
   publicKey: bot.public_key,
@@ -82,7 +89,7 @@ client.on('ready', () => {
 
       serverOwner.send(new Discord.MessageEmbed()
         .setTitle('Major Changes To TokTik Download')
-        .setDescription(`Hello, you are getting this message because you are the owner of one or more servers with me in it. If you would like to change settings for me on your server, you must re-invite me to your server using [this](${inviteURL}) link. This is because I now use slash commands which require additional permissions. If you are fine with the default settings, you may ignore this message.`))
+        .setDescription(`Hello, you are getting this message because you are the owner of one or more servers with me in it. If you would like to change settings for me on your server, you must re-invite me to your server using [this](${botInviteURL}) link. This is because I now use slash commands which require additional permissions. If you are fine with the default settings, you may ignore this message.`))
     }
 
     // If bot-list server then skip
@@ -218,11 +225,23 @@ client.on('message', async message => {
             ]
           : undefined
       }
+
+      response.buttons = guildOptions.details.link
+        ? [new MessageButton()
+            .setLabel('View On TikTok')
+            .setStyle('url')
+            .setURL(tiktok), new MessageButton()
+            .setLabel("Vote")
+            .setStyle("url")
+            .setEmoji("859225782039478312")
+            .setURL("https://discord-buttons.js.org")]
+        : undefined
     }
 
     // Wait for message to send...
     await channel.send(response).catch(err => {
       log.error(`Failed to send video with error: ${err}`)
+      console.error(err)
     })
 
     // If the message is deletable, and they have autodelete enabled, then...

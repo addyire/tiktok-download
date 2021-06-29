@@ -41,6 +41,8 @@ module.exports = class Help extends SlashCommand {
       .setColor(serverOptions.color)
       .setFooter(`Contact ${owner.tag} for any questions or help with this bot. | Version: ${version}`)
 
-    interaction.send({ embeds: [e.toJSON()] })
+    interaction.send({
+      embeds: [e.toJSON()]
+    })
   }
 }
