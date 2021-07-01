@@ -11,17 +11,14 @@ const log = require('./modules/log')
 const botInviteURL = require('./modules/invite')
 const { MessageButton } = require('discord-buttons')
 
-// Check to make sure invite URL is a valid link
-if (!/^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w.-]+)+[\w\-._~:/?#[\]@!$&'()*+,;=.]+$/.test(require('./other/settings.json').inviteURL)) {
-  throw new Error('inviteURL must be a valid link')
-}
-
 // Initialize counters
 let serverCount = 0
 let memberCount = 0
 
 // Initialize the bot and slash commands
-const client = new Discord.Client()
+const client = new Discord.Client({
+  intents: ['GUILD_INTEGRATIONS', 'GUILDS']
+})
 require('discord-buttons')(client)
 const creator = new SlashCreator({
   applicationID: bot.id,
@@ -42,35 +39,44 @@ creator.on('commandError', async (command, error, interaction) => {
   // Log error as a warning
   log.warn(error)
 
-  // Create a empty reason string
-  let reason = ''
+  let e
 
-  // If the error type is a validation error
-  if (error instanceof mongoose.Error.ValidationError) {
-    // For each of validation errors
-    for (const field in error.errors) {
-      // Add the reason to the message with a new line.
-      const thisE = error.errors[field].properties
-      reason += `${thisE.path}: ${thisE.message}\n`
+  try {
+    // Create a empty reason string
+    let reason = ''
+
+    // If the error type is a validation error
+    if (error instanceof mongoose.Error.ValidationError) {
+      // For each of validation errors
+      for (const field in error.errors) {
+        // Add the reason to the message with a new line.
+        const thisE = error.errors[field]
+        reason += `${thisE.path}: ${thisE.message}\n`
+      }
+    } else {
+      // Otherwise set the reason to the error message.
+      reason = error.message
     }
-  } else {
-    // Otherwise set the reason to the error message.
-    reason = error.message
+
+    // Create error message
+    e = new Discord.MessageEmbed()
+      .setTitle(':rotating_light: Error')
+      .setColor('#ff0000')
+      .setDescription(reason)
+      .setFooter(`If you believe this is a bug please contact ${owner.tag}`)
+      .toJSON()
+  } catch (err) {
+    log.error(`Fatal crash trying to generate error message: ${err}`)
+
+    e = new Discord.MessageEmbed()
+      .setTitle(':rotating_light: Fatal Error')
+      .setDescription(`A fatal error has occurred. Please contact ${owner.tag} to report this bug.`)
+      .setColor('#ff0000')
+      .toJSON()
+  } finally {
+    // Respond with error
+    interaction.send({ embeds: [e] })
   }
-
-  // Get the server options
-  const serverOptions = await ServerSettings.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true, useFindAndModify: true })
-
-  // Create error message
-  const e = new Discord.MessageEmbed()
-    .setTitle(':rotating_light: Error')
-    .setColor(serverOptions.color)
-    .setDescription(reason)
-    .setFooter(`If you believe this is a bug please contact ${owner.tag}`)
-    .toJSON()
-
-  // Respond with error
-  interaction.send({ embeds: [e] })
 })
 
 // On bot ready...
@@ -103,14 +109,19 @@ client.on('ready', () => {
   // Log server and member count
   log.info(`I am in ${serverCount} servers, serving ${memberCount} users.`)
 
-  // Every 15 minutes...
-  setInterval(() => {
-    // Set the bot presence
+  // Define function to update teh status
+  const setStatus = () => {
     client.user.setPresence({
-      activity: { name: status },
+      activity: {
+        name: status
+      },
       status: 'dnd'
     })
-  }, 15 * 60 * 1000)
+  }
+  setStatus()
+
+  // Every 15 minutes...
+  setInterval(setStatus, 15 * 60 * 1000)
 })
 
 // Whenever the bot joins a server...
@@ -193,55 +204,52 @@ client.on('message', async message => {
       files: [videoData.videoPath]
     }
 
+    const serverDetails = guildOptions.details
+
     // If they have video details enabled...
-    if (guildOptions.details.enabled) {
+    if (serverDetails.enabled && (serverDetails.description || serverDetails.requester || serverDetails.author || serverDetails.analytics)) {
       // Set the response embed to be the information they want
+      const [title, url] = serverDetails.link === 'embed' || serverDetails.link === 'both' ? ['View On TikTok', tiktok] : [undefined, undefined]
+
       response.embed = {
-        title: guildOptions.details.link ? 'View On TikTok' : undefined,
-        description: guildOptions.details.description ? videoData.text : undefined,
-        timestamp: guildOptions.details.requester ? new Date().toISOString() : undefined,
+        title,
+        url,
+        description: serverDetails.description ? videoData.text : undefined,
+        timestamp: serverDetails.requester ? new Date().toISOString() : undefined,
         color: guildOptions.color,
-        url: guildOptions.details.link ? tiktok : undefined,
-        author: guildOptions.details.author
+        author: serverDetails.author
           ? {
               name: `${videoData.authorMeta.nickName} (${videoData.authorMeta.name})`,
               icon_url: videoData.authorMeta.avatar
             }
           : undefined,
-        // thumbnail: {
-        //     url: thumbnail
-        // },
-        footer: guildOptions.details.requester
+        footer: serverDetails.requester
           ? {
               text: `Requested by ${message.author.tag}`,
               icon_url: message.author.avatarURL()
             }
           : undefined,
-        fields: guildOptions.details.analytics
+        fields: serverDetails.analytics
           ? [
               { name: ':arrow_forward: Plays', value: videoData.playCount, inline: true },
-              { name: ':speech_left: Comments', value: videoData.commentCount, inline: true },
+              { name: ':heart: Likes', value: videoData.diggCount, inline: true },
               { name: ':mailbox_with_mail: Shares', value: videoData.shareCount, inline: true }
             ]
           : undefined
       }
-
-      response.buttons = guildOptions.details.link
-        ? [new MessageButton()
-            .setLabel('View On TikTok')
-            .setStyle('url')
-            .setURL(tiktok), new MessageButton()
-            .setLabel("Vote")
-            .setStyle("url")
-            .setEmoji("859225782039478312")
-            .setURL("https://discord-buttons.js.org")]
-        : undefined
     }
+
+    response.buttons = serverDetails.link === 'button' || serverDetails.link === 'both'
+      ? [new MessageButton()
+          .setLabel('View On TikTok')
+          .setStyle('url')
+          .setEmoji('859225749281308702')
+          .setURL(tiktok)]
+      : undefined
 
     // Wait for message to send...
     await channel.send(response).catch(err => {
       log.error(`Failed to send video with error: ${err}`)
-      console.error(err)
     })
 
     // If the message is deletable, and they have autodelete enabled, then...
@@ -262,20 +270,20 @@ client.on('message', async message => {
     videoData.purge()
   }).catch(err => {
     // If theres an error...
+    // Log error
+    log.warn(`Encountered this error while downloading video: ${err}`)
 
     if (statusMessage && statusMessage.deletable) {
       // Delete the status message if there is one
       statusMessage.delete()
     }
 
-    // Log the error
-    // TODO handle this better
-    console.log(err)
-
     // Send user the error message
     channel.send(new Discord.MessageEmbed()
-      .setTitle(err.message)
-      .setColor(guildOptions.color)
+      .setTitle(':rotating_light: Error')
+      .setColor('#ff0000')
+      .setDescription('I couldn\'t download that video for some reason. Check to make sure the video link is valid.')
+      .setFooter(`Please contact ${owner.tag} if you believe this is an error`)
     )
   })
 })

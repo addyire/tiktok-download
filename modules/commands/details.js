@@ -1,8 +1,7 @@
 const Discord = require('discord.js')
-const { SlashCommand } = require('slash-create')
+const { SlashCommand, ComponentType, ButtonStyle } = require('slash-create')
 
 const ServerOptions = require('../mongo')
-const add = require('../counter')
 const botInviteURL = require('../invite')
 
 module.exports = class Details extends SlashCommand {
@@ -42,10 +41,28 @@ module.exports = class Details extends SlashCommand {
           required: false
         },
         {
-          type: 5,
+          type: 3,
           name: 'link',
           description: 'Show the link of the TikTok.',
-          required: false
+          required: false,
+          choices: [
+            {
+              name: 'disabled',
+              value: 'disabled'
+            },
+            {
+              name: 'embed',
+              value: 'embed'
+            },
+            {
+              name: 'button',
+              value: 'button'
+            },
+            {
+              name: 'both',
+              value: 'both'
+            }
+          ]
         }
       ]
     })
@@ -67,9 +84,7 @@ module.exports = class Details extends SlashCommand {
       throw new Error('You must have the ADMINISTRATOR permission to change settings.')
     }
 
-    add('interactions')
-
-    const serverOptions = await ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true })
+    const serverOptions = await ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true, useFindAndModify: true })
     const args = interaction.data.data.options.reduce((a, b) => {
       a[b.name] = b.value
       return a
@@ -82,7 +97,7 @@ module.exports = class Details extends SlashCommand {
     serverOptions.details.requester = args.requester === undefined ? serverOptions.details.requester : args.requester
     serverOptions.details.link = args.link === undefined ? serverOptions.details.link : args.link
 
-    if (!serverOptions.details.analytics && !serverOptions.details.author && !serverOptions.details.description && !serverOptions.details.requester && !serverOptions.details.link) {
+    if (!serverOptions.details.analytics && !serverOptions.details.author && !serverOptions.details.description && !serverOptions.details.requester && serverOptions.details.link === 'disabled') {
       serverOptions.details.enabled = false
     }
 
@@ -90,12 +105,12 @@ module.exports = class Details extends SlashCommand {
     await serverOptions.save()
 
     const detailSettings = serverOptions.details
-    const embeds = [new Discord.MessageEmbed().setTitle(':gear: Options Successfully Changed').setColor(serverOptions.color).toJSON()]
+    const embeds = [new Discord.MessageEmbed().setTitle(':gear: Options Successfully Changed').setDescription('Here is a preview of what the details will look like next time I send a TikTok.').setColor(serverOptions.color).toJSON()]
 
     // TODO convert to discord embed thing
-    if (detailSettings.enabled) {
+    if (detailSettings.enabled && (detailSettings.description || detailSettings.requester || detailSettings.author || detailSettings.analytics)) {
       embeds.push({
-        title: detailSettings.link ? 'View On TikTok (Example Message)' : undefined,
+        title: detailSettings.link === 'embed' || detailSettings.link === 'both' ? 'View On TikTok' : undefined,
         description: detailSettings.description ? 'The description would go here!' : undefined,
         timestamp: new Date().toISOString(),
         color: parseInt(serverOptions.color.substring(1), 16),
@@ -113,14 +128,29 @@ module.exports = class Details extends SlashCommand {
           : undefined,
         fields: detailSettings.analytics
           ? [
-              { name: ':arrow_forward: Plays', value: '1234', inline: true },
-              { name: ':speech_left: Comments', value: '1234', inline: true },
-              { name: ':mailbox_with_mail: Shares', value: '1234', inline: true }
+              { name: ':arrow_forward: Plays', value: '69M', inline: true },
+              { name: ':speech_left: Comments', value: '999k', inline: true },
+              { name: ':mailbox_with_mail: Shares', value: '450', inline: true }
             ]
           : undefined
       })
     }
 
-    interaction.send({ embeds })
+    const components = detailSettings.link === 'button' || detailSettings.link === 'both'
+      ? [{
+          components: [{
+            style: ButtonStyle.LINK,
+            type: ComponentType.BUTTON,
+            label: 'View On TikTok',
+            url: botInviteURL,
+            emoji: {
+              id: '859225749281308702'
+            }
+          }],
+          type: ComponentType.ACTION_ROW
+        }]
+      : undefined
+
+    interaction.send({ embeds, components })
   }
 }

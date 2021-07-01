@@ -17,7 +17,6 @@ const http = require('http')
 const fs = require('fs')
 const path = require('path')
 
-const add = require('./counter')
 const { compression, relativeDownloadPath } = require('../other/settings.json')
 const log = require('./log')
 
@@ -45,6 +44,12 @@ module.exports = (videoURL, status, guildID) => {
       returnInfo = videoMeta.collector[0]
       returnInfo.videoPath = path.join(basePath, `${videoID}.mp4`)
 
+      // Shorten the numbers
+      returnInfo.playCount = shortNum(returnInfo.playCount)
+      returnInfo.diggCount = shortNum(returnInfo.diggCount)
+      returnInfo.shareCount = shortNum(returnInfo.shareCount)
+      returnInfo.commentCount = shortNum(returnInfo.commentCount)
+
       log.info('Downloading...')
       return download(returnInfo.videoUrl, { headers }, returnInfo.videoPath)
     }).then(() => {
@@ -60,7 +65,7 @@ module.exports = (videoURL, status, guildID) => {
           // Update status message
           updateStatus(status, STATUS.NOT_PERMITTED)
           // Throw an error
-          throw new Error('Video file too large and compression is not enabled on this server.')
+          reject(new Error('Video file too large and compression is not enabled on this server.'))
         }
 
         // Update the status message
@@ -84,14 +89,12 @@ module.exports = (videoURL, status, guildID) => {
           .save(newVideoPath) // Save to the compressed video path
           .on('error', e => { // If an error occurs...
             log.error(`Failed to compress the video.\n ${e}`)
-            add('failed_compressions')
             reject(new Error('Failed to compress the video.')) // Throw a error which will be handled later
           })
           .on('end', () => { // Once compression is complete
             log.info(`Finished compressing the video. Time taken: ${new Date().getTime() - start}ms`)
 
-            // Update the status message and add to the counter
-            add('compressions')
+            // Update the status message
             updateStatus(status, STATUS.COMPLETE)
 
             // Define the videos purge function
@@ -121,11 +124,8 @@ module.exports = (videoURL, status, guildID) => {
         resolve(returnInfo)
       }
     }).catch(err => {
-      // If the type of the error is a string convert it to a real error object
-      // This is needed bc tiktok-scraper returns strings instead of errors for some reason
-      if (typeof err === 'string') {
-        reject(new Error(err))
-      } else reject(err)
+      // Reject with the error that was encountered
+      reject(err)
     })
   })
 }
@@ -220,4 +220,13 @@ function hasCompression (guildID) {
   if (compression.servers.indexOf(guildID) !== -1) return true
   // Otherwise return false
   return false
+}
+
+// Function to shorten numbers
+function shortNum (num) {
+  if (num >= 1000000) {
+    return num / 1000000 + 'M'
+  } else if (num >= 1000) {
+    return num / 1000 + 'K'
+  } else return num
 }

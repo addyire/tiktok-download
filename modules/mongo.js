@@ -6,6 +6,7 @@ mongoose.connect(mongo, { useNewUrlParser: true, useUnifiedTopology: true })
 
 // Define a function that checks if a string is a color code
 const colorValidator = (v) => (/^#([0-9a-f]{3}){1,2}$/i).test(v)
+const linkTypes = ['disabled', 'embed', 'button', 'both']
 
 // Create the schema
 const serverSchema = new mongoose.Schema({
@@ -31,8 +32,14 @@ const serverSchema = new mongoose.Schema({
       default: true
     },
     link: {
-      type: Boolean,
-      default: true
+      type: String,
+      validate: {
+        validator: (v) => {
+          if (linkTypes.indexOf(v) === -1) { return false } else return true
+        },
+        message: x => `${x.value} is not a valid type`
+      },
+      default: 'button'
     }
   },
   progress: {

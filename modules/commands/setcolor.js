@@ -1,9 +1,9 @@
 const Discord = require('discord.js')
 const { SlashCommand } = require('slash-create')
 
-const add = require('../counter')
 const ServerOptions = require('../mongo')
 const botInviteURL = require('../invite')
+const log = require('../log')
 
 module.exports = class SetColor extends SlashCommand {
   constructor (client, creator) {
@@ -37,15 +37,14 @@ module.exports = class SetColor extends SlashCommand {
       throw new Error('You must have the ADMINISTRATOR permission to change settings.')
     }
 
-    add('interactions')
-
-    const serverOptions = await ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true })
+    const serverOptions = await ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true, useFindAndModify: true })
     const args = interaction.data.data.options.reduce((a, b) => {
       a[b.name] = b.value
       return a
     }, {})
 
-    console.log(serverOptions)
+    log.info(`Setting color for ${interaction.guildID} to ${args.color}`)
+
     serverOptions.color = args.color
 
     await serverOptions.validate()

@@ -2,7 +2,6 @@ const Discord = require('discord.js')
 const { SlashCommand } = require('slash-create')
 
 const ServerOptions = require('../mongo')
-const add = require('../counter')
 const botInviteURL = require('../invite')
 
 module.exports = class Progress extends SlashCommand {
@@ -37,9 +36,7 @@ module.exports = class Progress extends SlashCommand {
       throw new Error('You must have the ADMINISTRATOR permission to change settings.')
     }
 
-    add('interactions')
-
-    const serverOptions = await ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true })
+    const serverOptions = await ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true, useFindAndModify: true })
     const args = interaction.data.data.options.reduce((a, b) => {
       a[b.name] = b.value
       return a

@@ -2,8 +2,8 @@ const Discord = require('discord.js')
 const { SlashCommand } = require('slash-create')
 
 const ServerOptions = require('../mongo')
-const add = require('../counter')
 const botInviteURL = require('../invite')
+const log = require('../log')
 
 module.exports = class Progress extends SlashCommand {
   constructor (client, creator) {
@@ -49,9 +49,7 @@ module.exports = class Progress extends SlashCommand {
       throw new Error('You must have the ADMINISTRATOR permission to change settings.')
     }
 
-    add('interactions')
-
-    const serverOptions = await ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true })
+    const serverOptions = await ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true, useFindAndModify: true })
     const args = interaction.data.data.options.reduce((a, b) => {
       a[b.name] = b.value
       return a
@@ -60,6 +58,8 @@ module.exports = class Progress extends SlashCommand {
     serverOptions.autodownload.enabled = args.enabled
     serverOptions.autodownload.deletemessage = args.deletemessage
     serverOptions.autodownload.smartdelete = args.smartdelete
+
+    log.info('Changing autodownload settings')
 
     await serverOptions.validate()
     await serverOptions.save()

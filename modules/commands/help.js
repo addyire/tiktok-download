@@ -1,9 +1,9 @@
 const Discord = require('discord.js')
-const { SlashCommand } = require('slash-create')
+const { SlashCommand, ButtonStyle, ComponentType } = require('slash-create')
 
 const ServerOptions = require('../mongo')
-const { owner, version, inviteURL } = require('../../other/settings.json')
-const add = require('../counter')
+const { owner, version } = require('../../other/settings.json')
+const botInviteURL = require('../invite')
 
 module.exports = class Help extends SlashCommand {
   constructor (client, creator) {
@@ -17,13 +17,13 @@ module.exports = class Help extends SlashCommand {
   onError () {}
 
   async run (interaction) {
-    add('interactions')
+    const serverOptions = await ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true, useFindAndModify: true })
 
-    const serverOptions = await ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true })
-
-    const e = new Discord.MessageEmbed()
+    let response = {}
+    
+    response.embeds = [new Discord.MessageEmbed()
       .setTitle('Invite TokTik Downloader')
-      .setURL(inviteURL)
+      .setURL(botInviteURL)
       .setDescription("This bot automagically replaces TikTok URL's with a MP4 file so you don't have to leave discord to watch it. \n*If you are being DM'd responses to commands make sure the bot has sufficient permissions to send messages in ALL channels.*")
       .addFields({
         name: 'Usage',
@@ -40,9 +40,24 @@ module.exports = class Help extends SlashCommand {
       })
       .setColor(serverOptions.color)
       .setFooter(`Contact ${owner.tag} for any questions or help with this bot. | Version: ${version}`)
+      .toJSON()
+    ]
 
-    interaction.send({
-      embeds: [e.toJSON()]
-    })
+    response.components = [{
+      components: [{
+        style: ButtonStyle.LINK,
+        type: ComponentType.BUTTON,
+        label: 'GitHub',
+        url: 'https://github.com/addyire/tiktok-download',
+        emoji: {
+          id: '859936938223206410'
+        }
+      }],
+      type: ComponentType.ACTION_ROW
+    }]
+
+    console.log(response)
+
+    interaction.send(response)
   }
 }

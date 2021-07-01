@@ -2,7 +2,6 @@ const Discord = require('discord.js')
 const { SlashCommand } = require('slash-create')
 
 const ServerOptions = require('../mongo')
-const add = require('../counter')
 const botInviteURL = require('../invite')
 
 module.exports = class Settings extends SlashCommand {
@@ -29,13 +28,12 @@ module.exports = class Settings extends SlashCommand {
       throw new Error('You must have the ADMINISTRATOR permission to view settings.')
     }
 
-    add('interactions')
+    const serverOptions = await ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true, useFindAndModify: true }).exec()
 
-    const serverOptions = await ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true }).exec()
-    console.log(serverOptions)
     // Create embed
     const e = new Discord.MessageEmbed()
       .setTitle('Server Settings')
+      .setColor(serverOptions.color)
       .setDescription('Here are the settings for this server')
 
     const data = serverOptions.toObject()
