@@ -17,10 +17,10 @@ module.exports = class Help extends SlashCommand {
   onError () {}
 
   async run (interaction) {
-    const serverOptions = await ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true, useFindAndModify: true })
+    const serverOptions = await ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true, useFindAndModify: false })
 
-    let response = {}
-    
+    const response = {}
+
     response.embeds = [new Discord.MessageEmbed()
       .setTitle('Invite TokTik Downloader')
       .setURL(botInviteURL)
@@ -50,7 +50,7 @@ module.exports = class Help extends SlashCommand {
         label: 'GitHub',
         url: 'https://github.com/addyire/tiktok-download',
         emoji: {
-          id: '859936938223206410'
+          id: '860239859972440064'
         }
       }],
       type: ComponentType.ACTION_ROW

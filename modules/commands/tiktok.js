@@ -27,7 +27,7 @@ module.exports = class TikTok extends SlashCommand {
   async run (interaction) {
     await interaction.defer()
 
-    const serverOptions = await ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true, useFindAndModify: true })
+    const serverOptions = await ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true, useFindAndModify: false })
     const serverDetails = serverOptions.details
 
     const args = interaction.data.data.options.reduce((a, b) => {

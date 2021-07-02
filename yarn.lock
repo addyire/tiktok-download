@@ -2547,10 +2547,10 @@ simple-swizzle@^0.2.2:
   dependencies:
     is-arrayish "^0.3.1"
 
-slash-create@^3.1.0:
-  version "3.2.3"
-  resolved "https://registry.yarnpkg.com/slash-create/-/slash-create-3.2.3.tgz#a452dabcb2455a310c617cb77fb726f444b6d9a4"
-  integrity sha512-XlSfm5sXIrk2tNkV2I2l4CWYCFuLeziTzbJoprWGZBT19bUHTm7iQ2qGQS3S+2InUigstjHlMcMMcksnOCw15g==
+slash-create@3.3.0:
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/slash-create/-/slash-create-3.3.0.tgz#af7845025d21b0134d6fd3ff8924e30eb92f0160"
+  integrity sha512-dH80fs7rVzYXxgt9thliJJaz/0GKfhMHgUOjQTgIHP5HjVf0kWjd9d774OJ1bvEoklH6xt3Nhr7pti7KgdNufg==
   dependencies:
     "@discordjs/collection" "^0.1.6"
     eventemitter3 "^4.0.7"

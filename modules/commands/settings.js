@@ -28,7 +28,7 @@ module.exports = class Settings extends SlashCommand {
       throw new Error('You must have the ADMINISTRATOR permission to view settings.')
     }
 
-    const serverOptions = await ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true, useFindAndModify: true }).exec()
+    const serverOptions = await ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true, useFindAndModify: false }).exec()
 
     // Create embed
     const e = new Discord.MessageEmbed()

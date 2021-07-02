@@ -167,7 +167,7 @@ client.on('message', async message => {
   const channel = message.channel.permissionsFor(client.user).has('SEND_MESSAGES') ? message.channel : message.author
 
   // Get options for this server
-  const guildOptions = await ServerSettings.findOneAndUpdate({ serverID: message.guild.id }, {}, { upsert: true, new: true, setDefaultsOnInsert: true, useFindAndModify: true })
+  const guildOptions = await ServerSettings.findOneAndUpdate({ serverID: message.guild.id }, {}, { upsert: true, new: true, setDefaultsOnInsert: true, useFindAndModify: false })
 
   // If they don't have autodownload enabled then return
   if (!guildOptions.autodownload.enabled) return

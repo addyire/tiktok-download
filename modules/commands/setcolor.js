@@ -37,7 +37,7 @@ module.exports = class SetColor extends SlashCommand {
       throw new Error('You must have the ADMINISTRATOR permission to change settings.')
     }
 
-    const serverOptions = await ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true, useFindAndModify: true })
+    const serverOptions = await ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true, useFindAndModify: false })
     const args = interaction.data.data.options.reduce((a, b) => {
       a[b.name] = b.value
       return a
