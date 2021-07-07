@@ -7,7 +7,8 @@ const { MessageButton } = require('discord-buttons')
 
 const TikTokParser = require('./modules/tiktok')
 const ServerSettings = require('./modules/mongo')
-const { tiktokStarters, bot, status, owner, reinviteMessage } = require('./other/settings.json')
+const { tiktok, bot, status, owner, reinviteMessage } = require('./other/settings.json')
+const { starters } = tiktok
 const log = require('./modules/log')
 const botInviteURL = require('./modules/invite')
 
@@ -294,7 +295,7 @@ function getTikTokFromStr (msg) {
   // Split the string and for each element...
   for (const element of msg.split(' ')) {
     // Loop through all the possible tiktok video starters...
-    for (const starter of tiktokStarters) {
+    for (const starter of starters) {
       // If there is a match then return the item of the first array
       if (element.startsWith(starter)) return element
     }

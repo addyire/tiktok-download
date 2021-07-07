@@ -17,7 +17,8 @@ const http = require('http')
 const fs = require('fs')
 const path = require('path')
 
-const { compression, relativeDownloadPath, proxies } = require('../other/settings.json')
+const { compression, relativeDownloadPath, tiktok } = require('../other/settings.json')
+const { proxies, sessions } = tiktok
 const log = require('./log')
 
 // Set constants
@@ -25,7 +26,8 @@ const basePath = path.join(__dirname, '..', relativeDownloadPath)
 const DISCORD_MAX_SIZE = compression.max_size
 const AUDIO_BITRATE = compression.audio_bitrate
 const SETTINGS = {
-  proxy: proxies === undefined || proxies.length === 0 ? '' : proxies
+  proxy: !Array.isArray(proxies) || proxies.length === 0 ? '' : proxies,
+  sessions: !Array.isArray(sessions) || sessions.length === 0 ? [''] : sessions
 }
 
 console.log(SETTINGS)
