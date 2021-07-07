@@ -27,7 +27,7 @@ const DISCORD_MAX_SIZE = compression.max_size
 const AUDIO_BITRATE = compression.audio_bitrate
 const SETTINGS = {
   proxy: !Array.isArray(proxies) || proxies.length === 0 ? '' : proxies,
-  sessions: !Array.isArray(sessions) || sessions.length === 0 ? [''] : sessions
+  sessionList: !Array.isArray(sessions) || sessions.length === 0 ? [''] : sessions
 }
 
 console.log(SETTINGS)
