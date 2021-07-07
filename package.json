@@ -4,7 +4,7 @@
   "main": "bot.js",
   "license": "MIT",
   "dependencies": {
-    "discord-buttons": "^3.2.1",
+    "discord-buttons": "^4.0.0",
     "discord.js": "^12.5.3",
     "ffmpeg-static": "^4.3.0",
     "fluent-ffmpeg": "^2.1.2",

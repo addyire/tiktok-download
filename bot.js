@@ -3,13 +3,13 @@ const path = require('path')
 const Discord = require('discord.js')
 const mongoose = require('mongoose')
 const fs = require('fs')
+const { MessageButton } = require('discord-buttons')
 
 const TikTokParser = require('./modules/tiktok')
 const ServerSettings = require('./modules/mongo')
 const { tiktokStarters, bot, status, owner, reinviteMessage } = require('./other/settings.json')
 const log = require('./modules/log')
 const botInviteURL = require('./modules/invite')
-const { MessageButton } = require('discord-buttons')
 
 // Initialize counters
 let serverCount = 0

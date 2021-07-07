@@ -20,6 +20,7 @@
     "helplink": "link for help. like a discord",
     "mongo": "mongodb://mongo server address:mongo server port/mongo database name",
     "relativeDownloadPath": "other/downloads",
+    "proxies": ["you can put proxies here. delete this if you don't have any or aren't going to use them"],
     "reinviteMessage": false,
     "tiktokStarters":  ["https://vm.tiktok.com/", "http://vm.tiktok.com/", "https://www.tiktok.com/", "http://www.tiktok.com/", "https://m.tiktok.com/v/", "http://m.tiktok.com/v/"]
 }

@@ -17,13 +17,18 @@ const http = require('http')
 const fs = require('fs')
 const path = require('path')
 
-const { compression, relativeDownloadPath } = require('../other/settings.json')
+const { compression, relativeDownloadPath, proxies } = require('../other/settings.json')
 const log = require('./log')
 
 // Set constants
 const basePath = path.join(__dirname, '..', relativeDownloadPath)
 const DISCORD_MAX_SIZE = compression.max_size
 const AUDIO_BITRATE = compression.audio_bitrate
+const SETTINGS = {
+  proxy: proxies === undefined || proxies.length === 0 ? '' : proxies
+}
+
+console.log(SETTINGS)
 
 module.exports = (videoURL, status, guildID) => {
   // Create random videoID
@@ -33,7 +38,7 @@ module.exports = (videoURL, status, guildID) => {
   // Return a promise
   return new Promise((resolve, reject) => {
     // Get video metaData then...
-    TikTokScraper.getVideoMeta(videoURL).then((videoMeta) => {
+    TikTokScraper.getVideoMeta(videoURL, SETTINGS).then((videoMeta) => {
       // Log status
       log.info('Got TikTok metadata')
 

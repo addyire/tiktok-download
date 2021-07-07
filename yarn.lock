@@ -759,10 +759,10 @@ detect-libc@^1.0.3:
   resolved "https://registry.yarnpkg.com/detect-libc/-/detect-libc-1.0.3.tgz#fa137c4bd698edf55cd5cd02ac559f91a4c4ba9b"
   integrity sha1-+hN8S9aY7fVc1c0CrFWfkaTEups=
 
-discord-buttons@^3.2.1:
-  version "3.2.1"
-  resolved "https://registry.yarnpkg.com/discord-buttons/-/discord-buttons-3.2.1.tgz#568eebc322d36b010ea67e891b01208c897d8e66"
-  integrity sha512-UN5xOLG0TwTX6Qr/hjdSyP63HxOYxs5saxfdJ/vijSqjfa/yVPgxO2InKF0l8rpsDOVMsLWGDFLI3+Ax97/LOg==
+discord-buttons@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/discord-buttons/-/discord-buttons-4.0.0.tgz#0068ae5cc18cdd30112fca19b4b4c453ccc2ac73"
+  integrity sha512-E/eQX4Ktj7nKwNDsTfCezBNCu73FtPWJfQcpKohfl0jct/ucMUO+7uhL2MhGsZr4SCfojk7OzccAznuntB564w==
 
 discord.js@^12.5.3:
   version "12.5.3"
@@ -2830,10 +2830,10 @@ text-table@^0.2.0:
   resolved "https://registry.yarnpkg.com/text-table/-/text-table-0.2.0.tgz#7f5ee823ae805207c00af2df4a84ec3fcfa570b4"
   integrity sha1-f17oI66AUgfACvLfSoTsP8+lcLQ=
 
-tiktok-scraper@^1.4.23:
-  version "1.4.23"
-  resolved "https://registry.yarnpkg.com/tiktok-scraper/-/tiktok-scraper-1.4.23.tgz#04e9740737c743731b7cff8dfae5be8c26e60e5c"
-  integrity sha512-sBrNEPHa5uMketrcZdKJ9bmPGABfEK5WITpYxsaaRu7I470mbecAxt6/67g/bhjMfyngZaPDo5gXMvwYdxyDwQ==
+tiktok-scraper@^1.4.33:
+  version "1.4.33"
+  resolved "https://registry.yarnpkg.com/tiktok-scraper/-/tiktok-scraper-1.4.33.tgz#af47e82c4072a9660246eb4ef6696a7896df60f6"
+  integrity sha512-wO3rCKw26lao9iBVzk3adneSTJanKmExePVrRrGeTxt3CjRfQXbvRIRxl+OQKMazEStlWHFSD8swLoBxLEdKQA==
   dependencies:
     archiver "^3.1.1"
     async "^3.1.0"
