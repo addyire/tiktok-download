@@ -20,8 +20,15 @@
         "proxies": ["you can put proxies here. delete this if you don't have any or aren't going to use them"],
         "sessions": ["this is a list of sessions. visit https://github.com/drawrowfly/tiktok-scraper to learn more. leave this list item to use no session", ""]
     },
+    "emojis": {
+        "tiktok": {
+            "id": "859225749281308702"
+        },
+        "github": {
+            "id": "860239859972440064"
+        }
+    },
     "status": "/help",
-    "version": "3.0",
     "helplink": "link for help. like a discord",
     "mongo": "mongodb://mongo server address:mongo server port/mongo database name",
     "relativeDownloadPath": "other/downloads",

@@ -17,9 +17,7 @@ let serverCount = 0
 let memberCount = 0
 
 // Initialize the bot and slash commands
-const client = new Discord.Client({
-  intents: ['GUILD_INTEGRATIONS', 'GUILDS']
-})
+const client = new Discord.Client()
 require('discord-buttons')(client)
 const creator = new SlashCreator({
   applicationID: bot.id,

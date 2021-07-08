@@ -2,7 +2,9 @@ const Discord = require('discord.js')
 const { SlashCommand, ButtonStyle, ComponentType } = require('slash-create')
 
 const ServerOptions = require('../mongo')
-const { owner, version } = require('../../other/settings.json')
+const { version } = require('../../package.json')
+const { owner, emojis } = require('../../other/settings.json')
+const { tiktok, github } = emojis
 const botInviteURL = require('../invite')
 
 module.exports = class Help extends SlashCommand {
@@ -49,14 +51,16 @@ module.exports = class Help extends SlashCommand {
         type: ComponentType.BUTTON,
         label: 'GitHub',
         url: 'https://github.com/addyire/tiktok-download',
-        emoji: {
-          id: '860239859972440064'
-        }
+        emoji: github
+      }, {
+        style: ButtonStyle.LINK,
+        type: ComponentType.BUTTON,
+        label: 'Invite',
+        url: botInviteURL,
+        emoji: tiktok
       }],
       type: ComponentType.ACTION_ROW
     }]
-
-    console.log(response)
 
     interaction.send(response)
   }

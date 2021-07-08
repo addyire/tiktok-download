@@ -3,7 +3,8 @@ const fs = require('fs')
 
 const ServerOptions = require('../mongo')
 const TikTokParser = require('../tiktok')
-const { owner } = require('../../other/settings.json')
+const { owner, emojis } = require('../../other/settings.json')
+const { tiktok } = emojis
 const log = require('../log')
 
 module.exports = class TikTok extends SlashCommand {
@@ -43,11 +44,10 @@ module.exports = class TikTok extends SlashCommand {
         }
       }
 
-      if (serverDetails.enabled) {
+      if (serverDetails.enabled && (serverDetails.description || serverDetails.requester || serverDetails.author || serverDetails.analytics)) {
         response.embeds = [{
           title: serverDetails.link === 'embed' || serverDetails.link === 'both' ? 'View On TikTok' : undefined,
           description: serverDetails.description ? videoData.text : undefined,
-          timestamp: serverDetails.requester ? new Date().toISOString() : undefined,
           color: parseInt(serverOptions.color.substring(1), 16),
           url: serverDetails.link === 'embed' || serverDetails.link === 'both' ? args.url : undefined,
           author: serverDetails.author
@@ -70,28 +70,33 @@ module.exports = class TikTok extends SlashCommand {
               ]
             : undefined
         }]
-        response.components = serverDetails.link === 'button' || serverDetails.link === 'both'
-          ? [{
-              components: [{
-                style: ButtonStyle.LINK,
-                type: ComponentType.BUTTON,
-                label: 'View On TikTok',
-                url: args.url,
-                emoji: {
-                  id: '859225749281308702'
-                }
-              }],
-              type: ComponentType.ACTION_ROW
-            }]
-          : undefined
+      } else {
+        response.embeds = [{
+          description: 'Here\'s your video',
+          color: parseInt(serverOptions.color.substring(1), 16)
+        }]
       }
+
+      response.components = serverDetails.link === 'button' || serverDetails.link === 'both'
+        ? [{
+            components: [{
+              style: ButtonStyle.LINK,
+              type: ComponentType.BUTTON,
+              label: 'View On TikTok',
+              url: args.url,
+              emoji: tiktok
+            }],
+            type: ComponentType.ACTION_ROW
+          }]
+        : undefined
+
+      console.log(response)
 
       interaction.send(response).then(() => {
         videoData.purge()
       })
     }).catch(err => {
       log.warn('Encountered this error while downloading video with interaction')
-      log.error(err)
 
       const e = {
         title: ':rotating_light: Error',

@@ -3,6 +3,7 @@ const { SlashCommand, ComponentType, ButtonStyle } = require('slash-create')
 
 const ServerOptions = require('../mongo')
 const botInviteURL = require('../invite')
+const tiktokEmoji = require('../../other/settings.json').emojis.tiktok
 
 module.exports = class Details extends SlashCommand {
   constructor (client, creator) {
@@ -143,9 +144,7 @@ module.exports = class Details extends SlashCommand {
             type: ComponentType.BUTTON,
             label: 'View On TikTok',
             url: botInviteURL,
-            emoji: {
-              id: '859225749281308702'
-            }
+            emoji: tiktokEmoji
           }],
           type: ComponentType.ACTION_ROW
         }]
