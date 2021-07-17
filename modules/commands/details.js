@@ -108,7 +108,6 @@ module.exports = class Details extends SlashCommand {
     const detailSettings = serverOptions.details
     const embeds = [new Discord.MessageEmbed().setTitle(':gear: Options Successfully Changed').setDescription('Here is a preview of what the details will look like next time I send a TikTok.').setColor(serverOptions.color).toJSON()]
 
-    // TODO convert to discord embed thing
     if (detailSettings.enabled && (detailSettings.description || detailSettings.requester || detailSettings.author || detailSettings.analytics)) {
       embeds.push({
         title: detailSettings.link === 'embed' || detailSettings.link === 'both' ? 'View On TikTok' : undefined,

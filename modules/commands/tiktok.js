@@ -90,13 +90,12 @@ module.exports = class TikTok extends SlashCommand {
           }]
         : undefined
 
-      console.log(response)
-
       interaction.send(response).then(() => {
         videoData.purge()
       })
     }).catch(err => {
-      log.warn('Encountered this error while downloading video with interaction')
+      log.warn('Encountered this error while downloading video with interaction' + err)
+      console.error(err)
 
       const e = {
         title: ':rotating_light: Error',

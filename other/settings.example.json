@@ -2,7 +2,7 @@
     "bot": {
         "id": "bot id",
         "token": "bot token",
-        "public_key": "bot public key"
+        "publicKey": "bot public key"
     },
     "owner": {
         "tag": "user#numbers",
@@ -18,7 +18,7 @@
     "tiktok": {
         "starters": ["https://vm.tiktok.com/", "http://vm.tiktok.com/", "https://www.tiktok.com/", "http://www.tiktok.com/", "https://m.tiktok.com/v/", "http://m.tiktok.com/v/"],
         "proxies": ["you can put proxies here. delete this if you don't have any or aren't going to use them"],
-        "sessions": ["this is a list of sessions. visit https://github.com/drawrowfly/tiktok-scraper to learn more. leave this list item to use no session", ""]
+        "sessions": ["this is a list of sessions. visit https://github.com/drawrowfly/tiktok-scraper to learn more. leave the last item in this list to use no session", ""]
     },
     "emojis": {
         "tiktok": {

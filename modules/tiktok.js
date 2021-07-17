@@ -30,8 +30,6 @@ const SETTINGS = {
   sessionList: !Array.isArray(sessions) || sessions.length === 0 ? [''] : sessions
 }
 
-console.log(SETTINGS)
-
 module.exports = (videoURL, status, guildID) => {
   // Create random videoID
   const videoID = Math.random().toString(36).substr(7)
@@ -175,11 +173,8 @@ function updateStatus (status, state) {
       ]
   }
 
-  // TODO check if this if is not needed
-  if (status) {
-    // Edit the message
-    status.statusMessage.edit({ embed: status.videoStatus })
-  }
+  // Actually edit the message
+  status.statusMessage.edit({ embed: status.videoStatus })
 }
 
 // Some download function I found on stack overflow that lets me use request headers

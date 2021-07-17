@@ -21,7 +21,7 @@ const client = new Discord.Client()
 require('discord-buttons')(client)
 const creator = new SlashCreator({
   applicationID: bot.id,
-  publicKey: bot.public_key,
+  publicKey: bot.publicKey,
   token: bot.token
 })
 
@@ -86,23 +86,32 @@ client.on('ready', () => {
 
   const sentMessages = []
 
+  log.info('SENDING MESSAGE TO ALL SERVER OWNERS')
+
+  let i = 0
+
   client.guilds.cache.forEach(async (item) => {
+    // If bot-list server then skip
+    if (item.id === '110373943822540800') return
+
     if (reinviteMessage && !sentMessages.includes(item.ownerID)) {
       sentMessages.push(item.ownerID)
 
       const serverOwner = await item.members.fetch(item.ownerID)
+      log.info(`Sending message to ${serverOwner.id}`)
 
-      serverOwner.send(new Discord.MessageEmbed()
-        .setTitle('Major Changes To TokTik Download')
-        .setDescription(`Hello, you are getting this message because you are the owner of one or more servers with me in it. If you would like to change settings for me on your server, you must re-invite me to your server using [this](${botInviteURL}) link. This is because I now use slash commands which require additional permissions. If you are fine with the default settings, you may ignore this message.`))
+      setTimeout(() => {
+        serverOwner.send(new Discord.MessageEmbed()
+          .setTitle('Major Changes To TokTik Download')
+          .setDescription(`Hello, you are getting this message because you are the owner of one or more servers with me in it. If you would like to change settings for me on your server, you must re-invite me to your server using [this](${botInviteURL}) link. This is because I now use slash commands which require additional permissions. If you are fine with the default settings, you may ignore this message.`))
+      }, i * 1000)
     }
-
-    // If bot-list server then skip
-    if (item.id === '110373943822540800') return
 
     // Add to the counters
     serverCount += 1
     memberCount += item.memberCount
+
+    i++
   })
 
   // Log server and member count
