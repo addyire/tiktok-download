@@ -36,6 +36,8 @@ module.exports = class TikTok extends SlashCommand {
       return a
     }, {})
 
+    if (!testURL(args.url)) throw new Error('Not a valid URL')
+
     TikTokParser(args.url, interaction.guildID, () => {}).then(videoData => {
       const response = {
         file: {
@@ -95,7 +97,6 @@ module.exports = class TikTok extends SlashCommand {
       })
     }).catch(err => {
       log.warn('Encountered this error while downloading video with interaction' + err, { serverID: interaction.guildID })
-      console.error(err)
 
       const e = {
         title: ':rotating_light: Error',
@@ -108,4 +109,8 @@ module.exports = class TikTok extends SlashCommand {
       interaction.send({ embeds: [e] })
     })
   }
+}
+
+function testURL (url) {
+  return /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w.-]+)+[\w\-._~:/?#[\]@!$&'()*+,;=.]+$/.test(url)
 }

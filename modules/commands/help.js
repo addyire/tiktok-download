@@ -3,10 +3,11 @@ const { SlashCommand, ButtonStyle, ComponentType } = require('slash-create')
 
 const ServerOptions = require('../mongo')
 const { version } = require('../../package.json')
-const { owner, emojis } = require('../../other/settings.json')
-const { tiktok, github } = emojis
+const { owner, emojis, helplink } = require('../../other/settings.json')
+const { tiktok, github, discord } = emojis
 const botInviteURL = require('../invite')
 const log = require('../log')
+
 module.exports = class Help extends SlashCommand {
   constructor (client, creator) {
     super(creator, {
@@ -38,7 +39,7 @@ module.exports = class Help extends SlashCommand {
         value: 'You can view the code [here](https://github.com/addyire/tiktok-download) on GitHub!'
       }, {
         name: 'Help',
-        value: 'For any additional help you can join the [official help discord](https://discord.gg/eCTMza4ggA). You can also create an issue on GitHub!'
+        value: `For any additional help you can join the [official help discord](${helplink}). You can also create an issue on GitHub!`
       })
       .setColor(serverOptions.color)
       .setFooter(`Contact ${owner.tag} for any questions or help with this bot. | Version: ${version}`)
@@ -58,6 +59,12 @@ module.exports = class Help extends SlashCommand {
         label: 'Invite',
         url: botInviteURL,
         emoji: tiktok
+      }, {
+        style: ButtonStyle.LINK,
+        type: ComponentType.BUTTON,
+        label: 'Help',
+        url: helplink,
+        emoji: discord
       }],
       type: ComponentType.ACTION_ROW
     }]
