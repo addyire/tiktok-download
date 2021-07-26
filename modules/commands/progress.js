@@ -1,8 +1,9 @@
-const Discord = require('discord.js')
 const { SlashCommand } = require('slash-create')
 
 const ServerOptions = require('../mongo')
 const botInviteURL = require('../invite')
+const { settingsChange } = require('../messageGenerator')
+const log = require('../log')
 
 module.exports = class Progress extends SlashCommand {
   constructor (client, creator) {
@@ -47,6 +48,12 @@ module.exports = class Progress extends SlashCommand {
     await serverOptions.validate()
     await serverOptions.save()
 
-    interaction.send({ embeds: [new Discord.MessageEmbed().setTitle(':gear: Options Successfully Changed').setColor(serverOptions.color).toJSON()] })
+    log.info(`${args.enabled ? 'Enabled' : 'Disabled'} progress message`, { serverID: interaction.guildID })
+
+    interaction.send({
+      embeds: [
+        settingsChange(`I have ${args.enabled ? 'enabled' : 'disabled'} the progress message`)
+      ]
+    })
   }
 }

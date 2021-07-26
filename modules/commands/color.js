@@ -1,14 +1,14 @@
-const Discord = require('discord.js')
 const { SlashCommand } = require('slash-create')
 
 const ServerOptions = require('../mongo')
 const botInviteURL = require('../invite')
 const log = require('../log')
+const { settingsChange } = require('../messageGenerator')
 
 module.exports = class SetColor extends SlashCommand {
   constructor (client, creator) {
     super(creator, {
-      name: 'setcolor',
+      name: 'color',
       description: 'Change the sidebar color',
       options: [
         {
@@ -43,13 +43,17 @@ module.exports = class SetColor extends SlashCommand {
       return a
     }, {})
 
-    log.info(`Setting color for ${interaction.guildID} to ${args.color}`)
+    log.info(`Set color to: ${args.color}`, { serverID: interaction.guildID })
 
     serverOptions.color = args.color
 
     await serverOptions.validate()
     await serverOptions.save()
 
-    interaction.send({ embeds: [new Discord.MessageEmbed().setTitle(':gear: Options Successfully Changed').setColor(serverOptions.color).toJSON()] })
+    interaction.send({
+      embeds: [
+        settingsChange(`I have changed the color to \`${args.color}\``)
+      ]
+    })
   }
 }

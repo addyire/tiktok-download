@@ -7,14 +7,10 @@ const { MessageButton } = require('discord-buttons')
 
 const TikTokParser = require('./modules/tiktok')
 const ServerSettings = require('./modules/mongo')
-const { tiktok, bot, status, owner, reinviteMessage } = require('./other/settings.json')
+const { tiktok, bot, status, owner, emojis } = require('./other/settings.json')
 const { starters } = tiktok
 const log = require('./modules/log')
 const botInviteURL = require('./modules/invite')
-
-// Initialize counters
-let serverCount = 0
-let memberCount = 0
 
 // Initialize the bot and slash commands
 const client = new Discord.Client()
@@ -35,8 +31,9 @@ creator
 
 // Whenever this is a slash-command error run this function...
 creator.on('commandError', async (command, error, interaction) => {
-  // Log error as a warning
-  log.warn(error)
+  if (error) {
+    log.error(`${error.message}`, { serverID: interaction.guildID })
+  }
 
   let e
 
@@ -82,37 +79,9 @@ creator.on('commandError', async (command, error, interaction) => {
 client.on('ready', () => {
   // Log that the bot is ready.
   log.info('Bot ready!')
-  log.info(`Invite Link: ${require('./modules/invite')}`)
+  log.info(`Invite Link: ${botInviteURL}`)
 
-  const sentMessages = []
-
-  log.info('SENDING MESSAGE TO ALL SERVER OWNERS')
-
-  let i = 0
-
-  client.guilds.cache.forEach(async (item) => {
-    // If bot-list server then skip
-    if (item.id === '110373943822540800') return
-
-    if (reinviteMessage && !sentMessages.includes(item.ownerID)) {
-      sentMessages.push(item.ownerID)
-
-      const serverOwner = await item.members.fetch(item.ownerID)
-      log.info(`Sending message to ${serverOwner.id}`)
-
-      setTimeout(() => {
-        serverOwner.send(new Discord.MessageEmbed()
-          .setTitle('Major Changes To TokTik Download')
-          .setDescription(`Hello, you are getting this message because you are the owner of one or more servers with me in it. If you would like to change settings for me on your server, you must re-invite me to your server using [this](${botInviteURL}) link. This is because I now use slash commands which require additional permissions. If you are fine with the default settings, you may ignore this message.`))
-      }, i * 1000)
-    }
-
-    // Add to the counters
-    serverCount += 1
-    memberCount += item.memberCount
-
-    i++
-  })
+  const [serverCount, memberCount] = getMemberServerCount()
 
   // Log server and member count
   log.info(`I am in ${serverCount} servers, serving ${memberCount} users.`)
@@ -126,36 +95,36 @@ client.on('ready', () => {
       status: 'dnd'
     })
   }
-  setStatus()
 
+  // Run Now
+  setStatus()
   // Every 15 minutes...
   setInterval(setStatus, 15 * 60 * 1000)
 })
 
 // Whenever the bot joins a server...
 client.on('guildCreate', member => {
-  // Add to the counters...
-  serverCount += 1
-  memberCount += member.memberCount
+  // Get server and member count
+  const [serverCount, memberCount] = getMemberServerCount()
 
   // Log that joined a server
   log.info(`Joined a new server! Now I am in ${serverCount} servers`)
 
   // Send the bot owner a message
-  messageOwner(`I just joined the server: "${member.name}". It has ${member.memberCount} users!\nServer Count: ${serverCount}`)
+  messageOwner(`I just joined the server: "${member.name}". It has ${member.memberCount} users!\nServer Count: ${serverCount} | Member Count: ${memberCount}`)
 })
 
 // Whenever the bot gets removed from a server...
 client.on('guildDelete', server => {
-  // Subtract from the counters...
-  serverCount -= 1
-  memberCount -= server.memberCount
+  // Get server and member count
+  const [serverCount, memberCount] = getMemberServerCount()
 
-  // Log that bot was removed
+  // Generate the message
+  const message = typeof server === 'undefined' ? 'A server I was in was just deleted.' : `I was just removed from: "${server.name}" which had ${server.memberCount} users.`
+
+  // Log and send message to the owner
   log.info(`Got removed from a server! Now I am in ${serverCount} servers`)
-
-  // Send bot owner a message
-  messageOwner(`I was just removed from: "${server.name}" which had ${server.memberCount} users.\nServer Count: ${serverCount}`)
+  messageOwner(message + `\nServer Count: ${serverCount} | Member Count: ${memberCount}`)
 })
 
 // On every message...
@@ -182,6 +151,7 @@ client.on('message', async message => {
 
   // Define some variables
   let videoStatus, statusMessage
+  let statusUpdater = () => {}
 
   // If they have progress messages enabled, create the message and send it
   if (guildOptions.progress.enabled) {
@@ -198,20 +168,25 @@ client.on('message', async message => {
 
     // Sending it
     statusMessage = await channel.send({ embed: videoStatus })
+
+    // Define status updater
+    statusUpdater = (status) => {
+      videoStatus.fields = status
+      statusMessage.edit({ embed: videoStatus })
+    }
   }
 
   // Log that the bot got a request for a video
-  log.info(`Got request for video: ${tiktok}`)
+  log.info(`📩 - Received Video: ${tiktok}`, { serverID: message.guild.id })
 
   // Get the video data
-  TikTokParser(tiktok, { statusMessage, videoStatus }, message.guild.id).then(async videoData => {
+  TikTokParser(tiktok, message.guild.id, statusUpdater).then(async videoData => {
     // With the video data...
 
     // Start making the message its going to send
     const response = {
       files: [videoData.videoPath]
     }
-
     const serverDetails = guildOptions.details
 
     // If they have video details enabled...
@@ -247,29 +222,29 @@ client.on('message', async message => {
       }
     }
 
-    response.buttons = serverDetails.link === 'button' || serverDetails.link === 'both'
+    response.buttons = (serverDetails.link === 'button' || serverDetails.link === 'both') && serverDetails.enabled
       ? [new MessageButton()
           .setLabel('View On TikTok')
           .setStyle('url')
-          .setEmoji('859225749281308702')
+          .setEmoji(emojis.tiktok.id)
           .setURL(tiktok)]
       : undefined
 
     // Wait for message to send...
     await channel.send(response).catch(err => {
-      log.error(`Failed to send video with error: ${err}`)
+      log.error(`⚠️ - ERROR SENDING VIDEO\n${err}`, { serverID: message.guild.id })
     })
 
     // If the message is deletable, and they have autodelete enabled, then...
     if (message.deletable && ((guildOptions.autodownload.deletemessage && guildOptions.autodownload.smartdelete && onlyTikTok) || (guildOptions.autodownload.deletemessage && !guildOptions.autodownload.smartdelete))) {
-      log.info('Deleting original message')
+      log.info('🗑️ - Deleting Original Message', { serverID: message.guild.id })
       // Delete the video
       message.delete()
     }
 
     // If there was a status message...
     if (statusMessage && statusMessage.deletable) {
-      log.info('Deleting status message')
+      log.info('🗑️ - Deleting Status Message', { serverID: message.guild.id })
       // Delete the status messsage.
       statusMessage.delete()
     }
@@ -279,7 +254,7 @@ client.on('message', async message => {
   }).catch(err => {
     // If theres an error...
     // Log error
-    log.warn(`Encountered this error while downloading video: ${err}`)
+    log.error(`⚠️ - ERROR PROCESSING VIDEO\n${err}`, { serverID: message.guild.id })
 
     if (statusMessage && statusMessage.deletable) {
       // Delete the status message if there is one
@@ -291,7 +266,7 @@ client.on('message', async message => {
       .setTitle(':rotating_light: Error')
       .setColor('#ff0000')
       .setDescription('I couldn\'t download that video for some reason. Check to make sure the video link is valid.')
-      .setFooter(`Please contact ${owner.tag} if you believe this is an error`)
+      .setFooter(`Please contact \`${owner.tag}\` if you believe this is an error`)
     )
   })
 })
@@ -318,7 +293,16 @@ function messageOwner (msg) {
   client.users.fetch(owner.id).then(usr => {
     // Send them a message
     usr.send(msg)
-  }).catch(err => log.error(`Error sending bot owner a message.\nError: ${err}\nMessage: ${msg}`))
+  }).catch(err => log.error(`👤 - Couldn't Find Owner\nError: ${err}\nMessage: ${msg}`))
+}
+
+// Function to calculate member and server count
+function getMemberServerCount () {
+  return client.guilds.cache.reduce((acc, item) => {
+    acc[0] += 1
+    acc[1] += item.memberCount
+    return acc
+  }, [0, 0])
 }
 
 // Dumb workaround for slash-create

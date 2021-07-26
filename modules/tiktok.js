@@ -1,15 +1,25 @@
 const TikTokScraper = require('tiktok-scraper')
 const ffmpeg = require('fluent-ffmpeg')
-const ffmpegPath = require('ffmpeg-static')
 
-ffmpeg.setFfmpegPath(ffmpegPath)
+ffmpeg.setFfmpegPath(require('ffmpeg-static'))
 
 const STATUS = {
-  DOWNLOADED: 0,
-  SKIPPED: 1,
-  COMPRESSING: 2,
-  COMPLETE: 3,
-  NOT_PERMITTED: 4
+  SKIPPED: [
+    { name: ':white_check_mark: Downloaded', value: 'Complete!', inline: true },
+    { name: ':fast_forward: Compressed', value: 'Skipped!', inline: true }
+  ],
+  COMPRESSING: [
+    { name: ':white_check_mark: Downloaded', value: 'Complete!', inline: true },
+    { name: ':thought_balloon: Compressing', value: 'Thinking...', inline: true }
+  ],
+  COMPLETE: [
+    { name: ':white_check_mark: Downloaded', value: 'Complete!', inline: true },
+    { name: ':white_check_mark: Compressed', value: 'Complete!', inline: true }
+  ],
+  NOT_PERMITTED: [
+    { name: ':white_check_mark: Downloaded', value: 'Complete!', inline: true },
+    { name: ':white_check_mark: Compressed', value: ':x: Not Permitted :x:', inline: true }
+  ]
 }
 
 const https = require('https')
@@ -30,7 +40,7 @@ const SETTINGS = {
   sessionList: !Array.isArray(sessions) || sessions.length === 0 ? [''] : sessions
 }
 
-module.exports = (videoURL, status, guildID) => {
+function processTikTok (videoURL, guildID, statusChange) {
   // Create random videoID
   const videoID = Math.random().toString(36).substr(7)
   let returnInfo
@@ -40,7 +50,7 @@ module.exports = (videoURL, status, guildID) => {
     // Get video metaData then...
     TikTokScraper.getVideoMeta(videoURL, SETTINGS).then((videoMeta) => {
       // Log status
-      log.info('Got TikTok metadata')
+      log.info('📊 - Download Metadata', { serverID: guildID })
 
       // Store the headers for downloading the video
       const headers = videoMeta.headers
@@ -55,10 +65,10 @@ module.exports = (videoURL, status, guildID) => {
       returnInfo.shareCount = shortNum(returnInfo.shareCount)
       returnInfo.commentCount = shortNum(returnInfo.commentCount)
 
-      log.info('Downloading...')
+      log.info('📲 - Downloading...', { serverID: guildID })
       return download(returnInfo.videoUrl, { headers }, returnInfo.videoPath)
     }).then(() => {
-      log.info('Download Complete')
+      log.info('✅ - Download Complete!', { serverID: guildID })
 
       const videoSize = fs.statSync(returnInfo.videoPath).size
 
@@ -66,19 +76,19 @@ module.exports = (videoURL, status, guildID) => {
       if (videoSize > DISCORD_MAX_SIZE) {
         // If the servers does not have compression enabled...
         if (!hasCompression(guildID)) {
-          log.info('Compression failed because server is not permitted.')
+          log.info('❌ - No Compression Permission', { serverID: guildID })
           // Update status message
-          updateStatus(status, STATUS.NOT_PERMITTED)
+          statusChange(STATUS.NOT_PERMITTED)
           // Throw an error
           reject(new Error('Video file too large and compression is not enabled on this server.'))
         }
 
         // Update the status message
-        updateStatus(status, STATUS.COMPRESSING)
+        statusChange(STATUS.COMPRESSING)
         // Store the start time
         const start = new Date().getTime()
 
-        log.info(`Video size is ${videoSize}. Compression required.`)
+        log.info(`🧈 - Compression Required (${videoSize / 1000000}mb)`, { serverID: guildID })
 
         // Calculate stuff for the video
         const oldPath = returnInfo.videoPath
@@ -93,18 +103,18 @@ module.exports = (videoURL, status, guildID) => {
           .audioBitrate(AUDIO_BITRATE) // Set the audio bitrate. (this probably isn't made)
           .save(newVideoPath) // Save to the compressed video path
           .on('error', e => { // If an error occurs...
-            log.error(`Failed to compress the video.\n ${e}`)
+            log.error(`❌ - FAILED TO COMPRESS VIDEO\n${e}`, { serverID: guildID })
             reject(new Error('Failed to compress the video.')) // Throw a error which will be handled later
           })
           .on('end', () => { // Once compression is complete
-            log.info(`Finished compressing the video. Time taken: ${new Date().getTime() - start}ms`)
+            log.info(`✅ - Compression FINISHED (${(new Date().getTime() - start) / 1000}s)`, { serverID: guildID })
 
             // Update the status message
-            updateStatus(status, STATUS.COMPLETE)
+            statusChange(STATUS.COMPLETE)
 
             // Define the videos purge function
             returnInfo.purge = () => {
-              log.info('Deleting videos')
+              log.info('🗑️ - Deleting Videos From Storage', { serverID: guildID })
               fs.unlinkSync(oldPath)
               fs.unlinkSync(newVideoPath)
             }
@@ -116,12 +126,12 @@ module.exports = (videoURL, status, guildID) => {
           })
       } else { // Otherwise...
         // Update the status message to say compression isn't required
-        updateStatus(status, STATUS.SKIPPED)
+        statusChange(STATUS.SKIPPED)
 
         // Set variables in the returnInfo
         returnInfo.videoName = `${videoID}.mp4`
         returnInfo.purge = () => {
-          log.info('Deleting video')
+          log.info('🗑️ - Deleting Video From Storage', { serverID: guildID })
           fs.unlinkSync(returnInfo.videoPath)
         }
 
@@ -133,48 +143,6 @@ module.exports = (videoURL, status, guildID) => {
       reject(err)
     })
   })
-}
-
-// Status updater function
-function updateStatus (status, state) {
-  // If there is no status message then don't do anything
-  if (status === undefined || !status.statusMessage || !status.videoStatus) return
-
-  // Update the status message accordingly
-  switch (state) {
-    case STATUS.DOWNLOADED:
-      status.videoStatus.fields = [
-        { name: ':white_check_mark: Downloaded', value: 'Complete!', inline: true },
-        { name: ':x: Compressed', value: 'Waiting...', inline: true }
-      ]
-      break
-    case STATUS.SKIPPED:
-      status.videoStatus.fields = [
-        { name: ':white_check_mark: Downloaded', value: 'Complete!', inline: true },
-        { name: ':fast_forward: Compressed', value: 'Skipped!', inline: true }
-      ]
-      break
-    case STATUS.COMPRESSING:
-      status.videoStatus.fields = [
-        { name: ':white_check_mark: Downloaded', value: 'Complete!', inline: true },
-        { name: ':thought_balloon: Compressing', value: 'Thinking...', inline: true }
-      ]
-      break
-    case STATUS.COMPLETE:
-      status.videoStatus.fields = [
-        { name: ':white_check_mark: Downloaded', value: 'Complete!', inline: true },
-        { name: ':white_check_mark: Compressed', value: 'Complete!', inline: true }
-      ]
-      break
-    case STATUS.NOT_PERMITTED:
-      status.videoStatus.fields = [
-        { name: ':white_check_mark: Downloaded', value: 'Complete!', inline: true },
-        { name: ':white_check_mark: Compressed', value: ':x: Not Permitted :x:', inline: true }
-      ]
-  }
-
-  // Actually edit the message
-  status.statusMessage.edit({ embed: status.videoStatus })
 }
 
 // Some download function I found on stack overflow that lets me use request headers
@@ -232,3 +200,5 @@ function shortNum (num) {
     return num / 1000 + 'K'
   } else return num
 }
+
+module.exports = processTikTok

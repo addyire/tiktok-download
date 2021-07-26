@@ -1,9 +1,10 @@
-const Discord = require('discord.js')
 const { SlashCommand, ComponentType, ButtonStyle } = require('slash-create')
 
 const ServerOptions = require('../mongo')
 const botInviteURL = require('../invite')
 const tiktokEmoji = require('../../other/settings.json').emojis.tiktok
+const { settingsChange } = require('../messageGenerator')
+const log = require('../log')
 
 module.exports = class Details extends SlashCommand {
   constructor (client, creator) {
@@ -105,8 +106,10 @@ module.exports = class Details extends SlashCommand {
     await serverOptions.validate()
     await serverOptions.save()
 
+    log.info('Changed details', { serverID: interaction.guildID })
+
     const detailSettings = serverOptions.details
-    const embeds = [new Discord.MessageEmbed().setTitle(':gear: Options Successfully Changed').setDescription('Here is a preview of what the details will look like next time I send a TikTok.').setColor(serverOptions.color).toJSON()]
+    const embeds = [settingsChange(args.enabled ? 'Here is a preview of what the details will look like next time I send a TikTok:' : 'Next time you request a TikTok, only the video will be sent.')]
 
     if (detailSettings.enabled && (detailSettings.description || detailSettings.requester || detailSettings.author || detailSettings.analytics)) {
       embeds.push({
@@ -136,7 +139,7 @@ module.exports = class Details extends SlashCommand {
       })
     }
 
-    const components = detailSettings.link === 'button' || detailSettings.link === 'both'
+    const components = (detailSettings.link === 'button' || detailSettings.link === 'both') && detailSettings.enabled
       ? [{
           components: [{
             style: ButtonStyle.LINK,

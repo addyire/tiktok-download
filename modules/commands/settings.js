@@ -3,7 +3,7 @@ const { SlashCommand } = require('slash-create')
 
 const ServerOptions = require('../mongo')
 const botInviteURL = require('../invite')
-
+const log = require('../log')
 module.exports = class Settings extends SlashCommand {
   constructor (client, creator) {
     super(creator, {
@@ -59,5 +59,7 @@ module.exports = class Settings extends SlashCommand {
     }
 
     interaction.send({ embeds: [e.toJSON()] })
+
+    log.info('Displaying settings', { serverID: interaction.guildID })
   }
 }

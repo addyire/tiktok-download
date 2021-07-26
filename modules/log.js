@@ -4,8 +4,9 @@ const path = require('path')
 
 const logPath = path.join(__dirname, '..', 'other', 'logs', 'tiktok.log')
 
-const myFormat = printf(({ level, message, timestamp }) => {
-  return `[${timestamp}] [${level}]: ${message}`
+const myFormat = printf((info, guild) => {
+  const { level, message, timestamp } = info
+  return `[${timestamp}] [${level}]${info.serverID ? ' [' + info.serverID + ']' : ''}: ${message}`
 })
 
 const logger = createLogger({

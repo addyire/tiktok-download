@@ -1,9 +1,9 @@
-const Discord = require('discord.js')
 const { SlashCommand } = require('slash-create')
 
 const ServerOptions = require('../mongo')
 const botInviteURL = require('../invite')
 const log = require('../log')
+const { settingsChange } = require('../messageGenerator')
 
 module.exports = class Progress extends SlashCommand {
   constructor (client, creator) {
@@ -59,13 +59,15 @@ module.exports = class Progress extends SlashCommand {
     serverOptions.autodownload.deletemessage = args.deletemessage
     serverOptions.autodownload.smartdelete = args.smartdelete
 
-    log.info('Changing autodownload settings')
+    log.info('Changed auto download settings', { serverID: interaction.guildID })
 
     await serverOptions.validate()
     await serverOptions.save()
 
-    const message = args.enabled ? ':white_check_mark: Auto Download Enabled :white_check_mark:' : ':x: Auto Download Disabled :x:'
-
-    interaction.send({ embeds: [new Discord.MessageEmbed().setTitle(message).setColor(serverOptions.color).toJSON()] })
+    interaction.send({
+      embeds: [
+        settingsChange(`I have successfully ${args.enabled ? 'updated' : 'disabled'} auto download!`)
+      ]
+    })
   }
 }

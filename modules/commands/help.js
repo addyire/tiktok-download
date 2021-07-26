@@ -6,7 +6,7 @@ const { version } = require('../../package.json')
 const { owner, emojis } = require('../../other/settings.json')
 const { tiktok, github } = emojis
 const botInviteURL = require('../invite')
-
+const log = require('../log')
 module.exports = class Help extends SlashCommand {
   constructor (client, creator) {
     super(creator, {
@@ -24,7 +24,7 @@ module.exports = class Help extends SlashCommand {
     const response = {}
 
     response.embeds = [new Discord.MessageEmbed()
-      .setTitle('Invite TokTik Downloader')
+      .setTitle('TokTik Downloader')
       .setURL(botInviteURL)
       .setDescription("This bot automagically replaces TikTok URL's with a MP4 file so you don't have to leave discord to watch it. \n*If you are being DM'd responses to commands make sure the bot has sufficient permissions to send messages in ALL channels.*")
       .addFields({
@@ -63,5 +63,7 @@ module.exports = class Help extends SlashCommand {
     }]
 
     interaction.send(response)
+
+    log.info('Sent help information', { serverID: interaction.guildID })
   }
 }

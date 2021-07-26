@@ -36,7 +36,7 @@ module.exports = class TikTok extends SlashCommand {
       return a
     }, {})
 
-    TikTokParser(args.url, undefined, interaction.guildID).then(videoData => {
+    TikTokParser(args.url, interaction.guildID, () => {}).then(videoData => {
       const response = {
         file: {
           name: 'tiktok.mp4',
@@ -94,7 +94,7 @@ module.exports = class TikTok extends SlashCommand {
         videoData.purge()
       })
     }).catch(err => {
-      log.warn('Encountered this error while downloading video with interaction' + err)
+      log.warn('Encountered this error while downloading video with interaction' + err, { serverID: interaction.guildID })
       console.error(err)
 
       const e = {

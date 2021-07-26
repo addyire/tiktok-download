@@ -1,6 +1,6 @@
 {
   "name": "tiktok-download-2",
-  "version": "2.0.0b",
+  "version": "2.1",
   "main": "bot.js",
   "license": "MIT",
   "dependencies": {
