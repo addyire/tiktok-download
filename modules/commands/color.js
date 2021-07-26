@@ -5,29 +5,17 @@ const botInviteURL = require('../invite')
 const log = require('../log')
 const { settingsChange } = require('../messageGenerator')
 
-module.exports = class Progress extends SlashCommand {
+module.exports = class SetColor extends SlashCommand {
   constructor (client, creator) {
     super(creator, {
-      name: 'autodownload',
-      description: 'Set whether to automatically download TikToks. No command necessary.',
+      name: 'color',
+      description: 'Change the sidebar color',
       options: [
         {
-          type: 5,
-          name: 'enabled',
-          description: 'Whether this is enabled or not.',
+          type: 3,
+          name: 'color',
+          description: 'The color itself. (Must be a hexcode like this: #ff0000)',
           required: true
-        },
-        {
-          type: 5,
-          name: 'deletemessage',
-          description: 'Delete the message with the URL in it.',
-          required: false
-        },
-        {
-          type: 5,
-          name: 'smartdelete',
-          description: 'When enabled, the message will not be deleted if there is more than just the URL in it.',
-          required: false
         }
       ]
     })
@@ -55,18 +43,16 @@ module.exports = class Progress extends SlashCommand {
       return a
     }, {})
 
-    serverOptions.autodownload.enabled = args.enabled
-    serverOptions.autodownload.deletemessage = args.deletemessage
-    serverOptions.autodownload.smartdelete = args.smartdelete
+    log.info(`Set color to: ${args.color}`, { serverID: interaction.guildID })
 
-    log.info('Changed auto download settings', { serverID: interaction.guildID })
+    serverOptions.color = args.color
 
     await serverOptions.validate()
     await serverOptions.save()
 
     interaction.send({
       embeds: [
-        settingsChange(`I have successfully ${args.enabled ? 'updated' : 'disabled'} auto download!`)
+        settingsChange(`I have changed the color to \`${args.color}\``)
       ]
     })
   }

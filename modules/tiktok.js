@@ -1,139 +1,151 @@
 const TikTokScraper = require('tiktok-scraper')
 const ffmpeg = require('fluent-ffmpeg')
-const ffmpegPath = require('ffmpeg-static')
 
-ffmpeg.setFfmpegPath(ffmpegPath)
+ffmpeg.setFfmpegPath(require('ffmpeg-static'))
+
+const STATUS = {
+  SKIPPED: [
+    { name: ':white_check_mark: Downloaded', value: 'Complete!', inline: true },
+    { name: ':fast_forward: Compressed', value: 'Skipped!', inline: true }
+  ],
+  COMPRESSING: [
+    { name: ':white_check_mark: Downloaded', value: 'Complete!', inline: true },
+    { name: ':thought_balloon: Compressing', value: 'Thinking...', inline: true }
+  ],
+  COMPLETE: [
+    { name: ':white_check_mark: Downloaded', value: 'Complete!', inline: true },
+    { name: ':white_check_mark: Compressed', value: 'Complete!', inline: true }
+  ],
+  NOT_PERMITTED: [
+    { name: ':white_check_mark: Downloaded', value: 'Complete!', inline: true },
+    { name: ':white_check_mark: Compressed', value: ':x: Not Permitted :x:', inline: true }
+  ]
+}
 
 const https = require('https')
 const http = require('http')
 const fs = require('fs')
 const path = require('path')
 
-const add = require('./counter')
-const { compression, relativeDownloadPath } = require('../other/settings.json')
+const { compression, relativeDownloadPath, tiktok } = require('../other/settings.json')
+const { proxies, sessions } = tiktok
 const log = require('./log')
 
+// Set constants
 const basePath = path.join(__dirname, '..', relativeDownloadPath)
 const DISCORD_MAX_SIZE = compression.max_size
 const AUDIO_BITRATE = compression.audio_bitrate
+const SETTINGS = {
+  proxy: !Array.isArray(proxies) || proxies.length === 0 ? '' : proxies,
+  sessionList: !Array.isArray(sessions) || sessions.length === 0 ? [''] : sessions
+}
 
-function downloadTikTok (videoURL, status, guildID) {
+function processTikTok (videoURL, guildID, statusChange) {
+  // Create random videoID
   const videoID = Math.random().toString(36).substr(7)
   let returnInfo
 
+  // Return a promise
   return new Promise((resolve, reject) => {
-    TikTokScraper.getVideoMeta(videoURL).then((videoMeta) => {
-      log.info('Got TikTok metadata')
+    // Get video metaData then...
+    TikTokScraper.getVideoMeta(videoURL, SETTINGS).then((videoMeta) => {
+      // Log status
+      log.info('📊 - Download Metadata', { serverID: guildID })
 
+      // Store the headers for downloading the video
       const headers = videoMeta.headers
+
+      // Store data about the video
       returnInfo = videoMeta.collector[0]
       returnInfo.videoPath = path.join(basePath, `${videoID}.mp4`)
 
+      // Shorten the numbers
+      returnInfo.playCount = shortNum(returnInfo.playCount)
+      returnInfo.diggCount = shortNum(returnInfo.diggCount)
+      returnInfo.shareCount = shortNum(returnInfo.shareCount)
+      returnInfo.commentCount = shortNum(returnInfo.commentCount)
+
+      log.info('📲 - Downloading...', { serverID: guildID })
       return download(returnInfo.videoUrl, { headers }, returnInfo.videoPath)
     }).then(() => {
+      log.info('✅ - Download Complete!', { serverID: guildID })
+
       const videoSize = fs.statSync(returnInfo.videoPath).size
 
+      // If the video is too big to upload to discord
       if (videoSize > DISCORD_MAX_SIZE) {
+        // If the servers does not have compression enabled...
         if (!hasCompression(guildID)) {
-          log.info('Compression failed because server is not permitted.')
-          throw new Error('Video file too large and compression is not enabled on this server.')
+          log.info('❌ - No Compression Permission', { serverID: guildID })
+          // Update status message
+          statusChange(STATUS.NOT_PERMITTED)
+          // Throw an error
+          reject(new Error('Video file too large and compression is not enabled on this server.'))
         }
 
-        updateStatus(status, 2)
+        // Update the status message
+        statusChange(STATUS.COMPRESSING)
+        // Store the start time
         const start = new Date().getTime()
 
-        log.info(`Video size is ${videoSize}. Compression required.`)
+        log.info(`🧈 - Compression Required (${videoSize / 1000000}mb)`, { serverID: guildID })
 
+        // Calculate stuff for the video
         const oldPath = returnInfo.videoPath
-        const newVideoPath = path.join(basePath, `${videoID}c.mp4`) // TODO make downloads path a setting
+        const newVideoPath = path.join(basePath, `${videoID}c.mp4`)
         const videoLength = returnInfo.videoMeta.duration
-        const wantedSize = DISCORD_MAX_SIZE * 0.8
-        const videoBitRate = ((wantedSize / 128) / videoLength) - AUDIO_BITRATE
+        const wantedSize = DISCORD_MAX_SIZE * 0.8 // Sometimes the compression is more than expected so this is done to mitigate that.
+        const videoBitRate = ((wantedSize / 128) / videoLength) - AUDIO_BITRATE // Calculate the bitrate
 
+        // Open video in ffmpeg
         ffmpeg(returnInfo.videoPath)
-          .videoBitrate(videoBitRate)
-          .audioBitrate(AUDIO_BITRATE)
-          .save(newVideoPath)
-          .on('error', e => {
-            log.error(`Failed to compress the video.\n ${e}`)
-            add('failed_compressions')
-            reject(new Error('Failed to compress the video.'))
+          .videoBitrate(videoBitRate) // Set the bitrate to the calculated bitrate
+          .audioBitrate(AUDIO_BITRATE) // Set the audio bitrate. (this probably isn't made)
+          .save(newVideoPath) // Save to the compressed video path
+          .on('error', e => { // If an error occurs...
+            log.error(`❌ - FAILED TO COMPRESS VIDEO\n${e}`, { serverID: guildID })
+            reject(new Error('Failed to compress the video.')) // Throw a error which will be handled later
           })
-          .on('end', () => {
-            log.info(`Finished compressing the video. Time taken: ${new Date().getTime() - start}ms`)
+          .on('end', () => { // Once compression is complete
+            log.info(`✅ - Compression FINISHED (${(new Date().getTime() - start) / 1000}s)`, { serverID: guildID })
 
-            add('compressions')
-            updateStatus(status, 3)
+            // Update the status message
+            statusChange(STATUS.COMPLETE)
 
+            // Define the videos purge function
             returnInfo.purge = () => {
-              log.info('Deleting videos')
+              log.info('🗑️ - Deleting Videos From Storage', { serverID: guildID })
               fs.unlinkSync(oldPath)
               fs.unlinkSync(newVideoPath)
             }
             returnInfo.videoPath = newVideoPath
             returnInfo.videoName = `${videoID}c.mp4`
 
+            // Return all the data once everything is complete
             resolve(returnInfo)
           })
-      } else {
-        updateStatus(status, 1)
+      } else { // Otherwise...
+        // Update the status message to say compression isn't required
+        statusChange(STATUS.SKIPPED)
+
+        // Set variables in the returnInfo
         returnInfo.videoName = `${videoID}.mp4`
         returnInfo.purge = () => {
-          log.info('Deleting video')
+          log.info('🗑️ - Deleting Video From Storage', { serverID: guildID })
           fs.unlinkSync(returnInfo.videoPath)
         }
+
+        // Resolve the promise with the information
         resolve(returnInfo)
       }
     }).catch(err => {
-      if (typeof err === 'string') {
-        reject(new Error(err))
-      } else reject(err)
+      // Reject with the error that was encountered
+      reject(err)
     })
   })
 }
 
-// Status uodater
-function updateStatus (status, state) {
-  if (status === undefined || !status.statusMessage || !status.videoStatus) return
-
-  switch (state) {
-    case 0:
-      status.videoStatus.fields = [
-        { name: ':white_check_mark: Downloaded', value: 'Complete!', inline: true },
-        { name: ':x: Compressed', value: 'Waiting...', inline: true }
-      ]
-      break
-    case 1:
-      status.videoStatus.fields = [
-        { name: ':white_check_mark: Downloaded', value: 'Complete!', inline: true },
-        { name: ':fast_forward: Compressed', value: 'Skipped!', inline: true }
-      ]
-      break
-    case 2:
-      status.videoStatus.fields = [
-        { name: ':white_check_mark: Downloaded', value: 'Complete!', inline: true },
-        { name: ':thought_balloon: Compressing', value: 'Thinking...', inline: true }
-      ]
-      break
-    case 3:
-      status.videoStatus.fields = [
-        { name: ':white_check_mark: Downloaded', value: 'Complete!', inline: true },
-        { name: ':white_check_mark: Compressed', value: 'Complete!', inline: true }
-      ]
-      break
-    case 4:
-      status.videoStatus.fields = [
-        { name: ':white_check_mark: Downloaded', value: 'Complete!', inline: true },
-        { name: ':white_check_mark: Compressed', value: ':x: Not Permitted :x:', inline: true }
-      ]
-  }
-
-  if (status) {
-    status.statusMessage.edit({ embed: status.videoStatus })
-  }
-}
-
-// Not my code
+// Some download function I found on stack overflow that lets me use request headers
 function download (url, options, filePath) {
   const proto = !url.charAt(4).localeCompare('s') ? https : http
 
@@ -170,12 +182,23 @@ function download (url, options, filePath) {
   })
 }
 
+// Function to check if a server has compression or not
 function hasCompression (guildID) {
+  // If restrict is not enabled then return true
   if (!compression.restrict) return true
+  // If serverID is in list of allowed servers, return true
   if (compression.servers.indexOf(guildID) !== -1) return true
+  // Otherwise return false
   return false
 }
 
-module.exports = {
-  TikTokParser: downloadTikTok
+// Function to shorten numbers
+function shortNum (num) {
+  if (num >= 1000000) {
+    return num / 1000000 + 'M'
+  } else if (num >= 1000) {
+    return num / 1000 + 'K'
+  } else return num
 }
+
+module.exports = processTikTok

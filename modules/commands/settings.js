@@ -2,9 +2,9 @@ const Discord = require('discord.js')
 const { SlashCommand } = require('slash-create')
 
 const ServerOptions = require('../mongo')
-const add = require('../counter')
-
-module.exports = class Progress extends SlashCommand {
+const botInviteURL = require('../invite')
+const log = require('../log')
+module.exports = class Settings extends SlashCommand {
   constructor (client, creator) {
     super(creator, {
       name: 'settings',
@@ -16,19 +16,24 @@ module.exports = class Progress extends SlashCommand {
   onError () {}
 
   async run (interaction) {
-    const hasPerms = (await (await this.client.guilds.fetch(interaction.guildID)).members.fetch(interaction.user.id)).hasPermission('ADMINISTRATOR')
+    let hasPerms
+
+    try {
+      hasPerms = (await this.client.guilds.cache.get(interaction.guildID).members.fetch(interaction.user.id)).hasPermission('ADMINISTRATOR')
+    } catch (err) {
+      throw new Error(`I am not in this server as a bot. Please have an administrator click [this](${botInviteURL}) link to invite me.`)
+    }
 
     if (!hasPerms) {
       throw new Error('You must have the ADMINISTRATOR permission to view settings.')
     }
 
-    add('interactions')
-
-    const serverOptions = await ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true, useFindAndModify: true })
+    const serverOptions = await ServerOptions.findOneAndUpdate({ serverID: interaction.guildID }, {}, { upsert: true, new: true, setDefaultsOnInsert: true, useFindAndModify: false }).exec()
 
     // Create embed
     const e = new Discord.MessageEmbed()
       .setTitle('Server Settings')
+      .setColor(serverOptions.color)
       .setDescription('Here are the settings for this server')
 
     const data = serverOptions.toObject()
@@ -54,5 +59,7 @@ module.exports = class Progress extends SlashCommand {
     }
 
     interaction.send({ embeds: [e.toJSON()] })
+
+    log.info('Displaying settings', { serverID: interaction.guildID })
   }
 }
