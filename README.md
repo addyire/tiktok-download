@@ -8,6 +8,12 @@ Discord bot that automatically downloads TikToks<br>
 
 </div>
 
+## Usage
+
+1. To use this bot, first invite it to your server with [this](https://discord.com/api/oauth2/authorize?client_id=819836629250080779&permissions=59392&scope=applications.commands%20bot) link.
+2. Type / to see all of the available commands
+3. If you have autodownload enabled, you can just send a tiktok to any channel and the bot will download your video!
+
 ## Features
 
 - Compression

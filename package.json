@@ -1,6 +1,6 @@
 {
-  "name": "tiktok-download-2",
-  "version": "2.1",
+  "name": "tiktok-download",
+  "version": "2.1.0",
   "main": "bot.js",
   "license": "MIT",
   "dependencies": {
@@ -22,5 +22,21 @@
   },
   "scripts": {
     "start": "node bot.js"
-  }
+  },
+  "description": "<div align=\"center\">\r     <img src=\"./other/readme/logo.png\" height=150><br>\r Discord bot that automatically downloads TikToks<br>\r     <a href=\"https://discord.gg/D7SsERdD4M\"><img alt=\"Discord\" src=\"https://img.shields.io/discord/792286443660771359?logo=discord\"></a>\r     <a href=\"https://discord.com/api/oauth2/authorize?client_id=819836629250080779&permissions=59392&scope=applications.commands%20bot\"><img src=\"https://img.shields.io/badge/servers-99%2B-green\"></a>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/addyire/tiktok-download.git"
+  },
+  "keywords": [
+    "tiktok",
+    "discord",
+    "bot",
+    "download"
+  ],
+  "author": "Addy Ire",
+  "bugs": {
+    "url": "https://github.com/addyire/tiktok-download/issues"
+  },
+  "homepage": "https://github.com/addyire/tiktok-download#readme"
 }
