@@ -2,11 +2,17 @@
     <img src="./other/readme/logo.png" height=150><br>
 Discord bot that automatically downloads TikToks<br>
     <a href="https://discord.gg/D7SsERdD4M"><img alt="Discord" src="https://img.shields.io/discord/792286443660771359?logo=discord"></a>
-    <a href="https://discord.com/oauth2/authorize?client_id=819836629250080779&scope=bot&permissions=11264"><img src="https://img.shields.io/badge/servers-99%2B-green"></a>
+    <a href="https://discord.com/api/oauth2/authorize?client_id=819836629250080779&permissions=59392&scope=applications.commands%20bot"><img src="https://img.shields.io/badge/servers-99%2B-green"></a>
 
 
 
 </div>
+
+## Usage
+
+1. To use this bot, first invite it to your server with [this](https://discord.com/api/oauth2/authorize?client_id=819836629250080779&permissions=59392&scope=applications.commands%20bot) link.
+2. Type / to see all of the available commands
+3. If you have autodownload enabled, you can just send a tiktok to any channel and the bot will download your video!
 
 ## Features
 
@@ -16,7 +22,7 @@ Discord bot that automatically downloads TikToks<br>
 
 ## Invite
 
-If you don't want to host the bot yourself you can get add it to your server [here](https://discord.com/oauth2/authorize?client_id=819836629250080779&scope=bot&permissions=11264)
+If you don't want to host the bot yourself you can get add it to your server [here](https://discord.com/api/oauth2/authorize?client_id=819836629250080779&permissions=59392&scope=applications.commands%20bot)
 
 ## Commands
 
@@ -28,7 +34,6 @@ There are a few commands that allow you to configure the bot.
 - /progress
 - /setcolor
 - /settings
-- /bot <= owner only command
 ## Running
 
 1. Run the following commands

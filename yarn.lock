@@ -759,6 +759,11 @@ detect-libc@^1.0.3:
   resolved "https://registry.yarnpkg.com/detect-libc/-/detect-libc-1.0.3.tgz#fa137c4bd698edf55cd5cd02ac559f91a4c4ba9b"
   integrity sha1-+hN8S9aY7fVc1c0CrFWfkaTEups=
 
+discord-buttons@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/discord-buttons/-/discord-buttons-4.0.0.tgz#0068ae5cc18cdd30112fca19b4b4c453ccc2ac73"
+  integrity sha512-E/eQX4Ktj7nKwNDsTfCezBNCu73FtPWJfQcpKohfl0jct/ucMUO+7uhL2MhGsZr4SCfojk7OzccAznuntB564w==
+
 discord.js@^12.5.3:
   version "12.5.3"
   resolved "https://registry.yarnpkg.com/discord.js/-/discord.js-12.5.3.tgz#56820d473c24320871df9ea0bbc6b462f21cf85c"
@@ -1848,10 +1853,29 @@ mime-db@1.48.0:
   resolved "https://registry.yarnpkg.com/mime-db/-/mime-db-1.48.0.tgz#e35b31045dd7eada3aaad537ed88a33afbef2d1d"
   integrity sha512-FM3QwxV+TnZYQ2aRqhlKBMHxk10lTbMt3bBkMAp54ddrNeVSfcQYOOKuGuy3Ddrm38I04If834fOUSq1yzslJQ==
 
+<<<<<<< HEAD
 mime-types@^2.1.12, mime-types@~2.1.19:
   version "2.1.31"
   resolved "https://registry.yarnpkg.com/mime-types/-/mime-types-2.1.31.tgz#a00d76b74317c61f9c2db2218b8e9f8e9c5c9e6b"
   integrity sha512-XGZnNzm3QvgKxa8dpzyhFTHmpP3l5YNusmne07VUOXxou9CqUqYa/HBy124RqtVh/O2pECas/MOcsDgpilPOPg==
+=======
+mime-db@1.48.0:
+  version "1.48.0"
+  resolved "https://registry.yarnpkg.com/mime-db/-/mime-db-1.48.0.tgz#e35b31045dd7eada3aaad537ed88a33afbef2d1d"
+  integrity sha512-FM3QwxV+TnZYQ2aRqhlKBMHxk10lTbMt3bBkMAp54ddrNeVSfcQYOOKuGuy3Ddrm38I04If834fOUSq1yzslJQ==
+
+mime-types@^2.1.12:
+  version "2.1.31"
+  resolved "https://registry.yarnpkg.com/mime-types/-/mime-types-2.1.31.tgz#a00d76b74317c61f9c2db2218b8e9f8e9c5c9e6b"
+  integrity sha512-XGZnNzm3QvgKxa8dpzyhFTHmpP3l5YNusmne07VUOXxou9CqUqYa/HBy124RqtVh/O2pECas/MOcsDgpilPOPg==
+  dependencies:
+    mime-db "1.48.0"
+
+mime-types@~2.1.19:
+  version "2.1.30"
+  resolved "https://registry.yarnpkg.com/mime-types/-/mime-types-2.1.30.tgz#6e7be8b4c479825f85ed6326695db73f9305d62d"
+  integrity sha512-crmjA4bLtR8m9qLpHvgxSChT+XoSlZi8J4n/aIdn3z92e/U47Z0V/yl+Wh9W046GgFVAmoNR/fmdbZYcSSIUeg==
+>>>>>>> development
   dependencies:
     mime-db "1.48.0"
 
@@ -2522,10 +2546,17 @@ simple-swizzle@^0.2.2:
   dependencies:
     is-arrayish "^0.3.1"
 
+<<<<<<< HEAD
 slash-create@^3.1.0:
   version "3.2.3"
   resolved "https://registry.yarnpkg.com/slash-create/-/slash-create-3.2.3.tgz#a452dabcb2455a310c617cb77fb726f444b6d9a4"
   integrity sha512-XlSfm5sXIrk2tNkV2I2l4CWYCFuLeziTzbJoprWGZBT19bUHTm7iQ2qGQS3S+2InUigstjHlMcMMcksnOCw15g==
+=======
+slash-create@3.3.0:
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/slash-create/-/slash-create-3.3.0.tgz#af7845025d21b0134d6fd3ff8924e30eb92f0160"
+  integrity sha512-dH80fs7rVzYXxgt9thliJJaz/0GKfhMHgUOjQTgIHP5HjVf0kWjd9d774OJ1bvEoklH6xt3Nhr7pti7KgdNufg==
+>>>>>>> development
   dependencies:
     "@discordjs/collection" "^0.1.6"
     eventemitter3 "^4.0.7"
@@ -2805,10 +2836,17 @@ text-table@^0.2.0:
   resolved "https://registry.yarnpkg.com/text-table/-/text-table-0.2.0.tgz#7f5ee823ae805207c00af2df4a84ec3fcfa570b4"
   integrity sha1-f17oI66AUgfACvLfSoTsP8+lcLQ=
 
+<<<<<<< HEAD
 tiktok-scraper@^1.4.23:
   version "1.4.31"
   resolved "https://registry.yarnpkg.com/tiktok-scraper/-/tiktok-scraper-1.4.31.tgz#65edccdb1aff895387f6fa044f4e86bd8e09319d"
   integrity sha512-ybTjlihY1zSIHBDERp/QppqTf+P5DpTtaCyoBafIcOYHYdQ/gdoyecs4NuYKN4RzEF341SZflZDgWsTvgQOL1g==
+=======
+tiktok-scraper@^1.4.33:
+  version "1.4.33"
+  resolved "https://registry.yarnpkg.com/tiktok-scraper/-/tiktok-scraper-1.4.33.tgz#af47e82c4072a9660246eb4ef6696a7896df60f6"
+  integrity sha512-wO3rCKw26lao9iBVzk3adneSTJanKmExePVrRrGeTxt3CjRfQXbvRIRxl+OQKMazEStlWHFSD8swLoBxLEdKQA==
+>>>>>>> development
   dependencies:
     archiver "^3.1.1"
     async "^3.1.0"
@@ -3088,10 +3126,22 @@ wrappy@1:
   resolved "https://registry.yarnpkg.com/wrappy/-/wrappy-1.0.2.tgz#b5243d8f3ec1aa35f1364605bc0d1036e30ab69f"
   integrity sha1-tSQ9jz7BqjXxNkYFvA0QNuMKtp8=
 
+<<<<<<< HEAD
 ws@^7.4.4, ws@^7.4.5:
   version "7.5.0"
   resolved "https://registry.yarnpkg.com/ws/-/ws-7.5.0.tgz#0033bafea031fb9df041b2026fc72a571ca44691"
   integrity sha512-6ezXvzOZupqKj4jUqbQ9tXuJNo+BR2gU8fFRk3XCP3e0G6WT414u5ELe6Y0vtp7kmSJ3F7YWObSNr1ESsgi4vw==
+=======
+ws@^7.4.4:
+  version "7.5.1"
+  resolved "https://registry.yarnpkg.com/ws/-/ws-7.5.1.tgz#44fc000d87edb1d9c53e51fbc69a0ac1f6871d66"
+  integrity sha512-2c6faOUH/nhoQN6abwMloF7Iyl0ZS2E9HGtsiLrWn0zOOMWlhtDmdf/uihDt6jnuCxgtwGBNy6Onsoy2s2O2Ow==
+
+ws@^7.4.5:
+  version "7.4.5"
+  resolved "https://registry.yarnpkg.com/ws/-/ws-7.4.5.tgz#a484dd851e9beb6fdb420027e3885e8ce48986c1"
+  integrity sha512-xzyu3hFvomRfXKH8vOFMU3OguG6oOvhXMo3xsGy3xWExqaM2dxBbVxuD99O7m3ZUFMvvscsZDqxfgMaRr/Nr1g==
+>>>>>>> development
 
 xml-name-validator@^3.0.0:
   version "3.0.0"
