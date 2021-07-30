@@ -35,5 +35,5 @@
     "helplink": "link for help. like a discord",
     "mongo": "mongodb://mongo server address:mongo server port/mongo database name",
     "relativeDownloadPath": "other/downloads",
-    "reinviteMessage": false
+    "voteURL": "url for voting"
 }
