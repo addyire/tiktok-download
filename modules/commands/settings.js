@@ -49,6 +49,7 @@ module.exports = class Settings extends SlashCommand {
 
       if (typeof cat === 'object') {
         for (const item of Object.keys(cat)) {
+          if (typeof cat[item] === 'object') continue
           str += `\`${item}\`: \`${cat[item]}\`\n`
         }
       } else {
