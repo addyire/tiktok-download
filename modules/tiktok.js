@@ -40,10 +40,10 @@ const SETTINGS = {
   sessionList: !Array.isArray(sessions) || sessions.length === 0 ? [''] : sessions
 }
 
-function processTikTok (videoURL, guildID, statusChange) {
+function processTikTok (videoURL, guildID, statusChange, downloadDoc) {
   // Create random videoID
   const videoID = Math.random().toString(36).substr(7)
-  let returnInfo
+  let returnInfo = { videoURL }
 
   // Return a promise
   return new Promise((resolve, reject) => {
@@ -56,7 +56,7 @@ function processTikTok (videoURL, guildID, statusChange) {
       const headers = videoMeta.headers
 
       // Store data about the video
-      returnInfo = videoMeta.collector[0]
+      returnInfo = { ...returnInfo, ...videoMeta.collector[0] }
       returnInfo.videoPath = path.join(basePath, `${videoID}.mp4`)
 
       // Shorten the numbers
@@ -71,6 +71,10 @@ function processTikTok (videoURL, guildID, statusChange) {
       log.info('✅ - Download Complete!', { serverID: guildID })
 
       const videoSize = fs.statSync(returnInfo.videoPath).size
+
+      // Update the video document
+      downloadDoc.video.size = videoSize
+      downloadDoc.video.compressed = videoSize > DISCORD_MAX_SIZE
 
       // If the video is too big to upload to discord
       if (videoSize > DISCORD_MAX_SIZE) {
@@ -120,6 +124,9 @@ function processTikTok (videoURL, guildID, statusChange) {
             }
             returnInfo.videoPath = newVideoPath
             returnInfo.videoName = `${videoID}c.mp4`
+
+            // Store the post compression size
+            downloadDoc.video.postCompressSize = fs.statSync(newVideoPath).size
 
             // Return all the data once everything is complete
             resolve(returnInfo)

@@ -1,6 +1,7 @@
 // Require stuff
 const mongoose = require('mongoose')
 const { mongo } = require('../other/settings.json')
+const log = require('./log')
 
 mongoose.connect(mongo, { useNewUrlParser: true, useUnifiedTopology: true })
 
@@ -70,11 +71,66 @@ const serverSchema = new mongoose.Schema({
     },
     default: '#FF00FF'
   },
+  limiter: {
+    pastDownloads: [{
+      paid: Boolean,
+      compressed: Boolean
+    }],
+    paidDownloads: {
+      type: Number,
+      default: 0
+    }
+  },
+  banned: {
+    users: {
+      type: [String],
+      default: []
+    },
+    channels: {
+      type: [String],
+      default: []
+    }
+  },
   serverID: String
 })
 
 // Load schema
-const Server = mongoose.model('server', serverSchema)
+const ServerOptions = mongoose.model('server', serverSchema)
+
+// Create tiktok schema
+const downloadSchema = new mongoose.Schema({
+  identity: {
+    userID: String,
+    serverID: String,
+    interaction: Boolean
+  },
+  time: {
+    timestamp: Date,
+    timeTaken: Number
+  },
+  video: {
+    url: String,
+    size: Number,
+    postCompressSize: Number,
+    compressed: Boolean
+  },
+  errorProcessing: Boolean
+})
+
+//
+const Download = mongoose.model('downloads', downloadSchema)
 
 // Export schema
-module.exports = Server
+module.exports = { ServerOptions, Download }
+
+// Log database events
+mongoose.connection.on('connected', () => {
+  log.info('Successfully connected to database!')
+})
+mongoose.connection.on('error', (err) => {
+  log.error(`Mongo Error \n${err}`)
+  console.error(err)
+})
+mongoose.connection.on('disconnected', () => {
+  log.error('Disconnected from database!')
+})

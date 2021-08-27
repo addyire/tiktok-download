@@ -1,7 +1,7 @@
-const Discord = require('discord.js')
 const { SlashCommand } = require('slash-create')
+const Discord = require('discord.js')
 
-const ServerOptions = require('../mongo')
+const { ServerOptions } = require('../mongo')
 const botInviteURL = require('../invite')
 const log = require('../log')
 module.exports = class Settings extends SlashCommand {
@@ -19,7 +19,7 @@ module.exports = class Settings extends SlashCommand {
     let hasPerms
 
     try {
-      hasPerms = (await this.client.guilds.cache.get(interaction.guildID).members.fetch(interaction.user.id)).hasPermission('ADMINISTRATOR')
+      hasPerms = (await (await this.client.guilds.fetch(interaction.guildID)).members.fetch(interaction.user.id)).permissions.has('ADMINISTRATOR')
     } catch (err) {
       throw new Error(`I am not in this server as a bot. Please have an administrator click [this](${botInviteURL}) link to invite me.`)
     }
@@ -46,6 +46,8 @@ module.exports = class Settings extends SlashCommand {
     for (const key of Object.keys(data)) {
       const cat = data[key]
       let str = ''
+
+      if (key === 'banned' || key === 'limiter') continue
 
       if (typeof cat === 'object') {
         for (const item of Object.keys(cat)) {

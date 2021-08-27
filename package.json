@@ -1,16 +1,16 @@
 {
-  "name": "tiktok-download-2",
-  "version": "2.1",
+  "name": "tiktok-download",
+  "version": "2.2b",
   "main": "bot.js",
   "license": "MIT",
   "dependencies": {
     "discord-buttons": "^4.0.0",
-    "discord.js": "^12.5.3",
+    "discord.js": "^13.1.0",
     "ffmpeg-static": "^4.3.0",
     "fluent-ffmpeg": "^2.1.2",
     "mongoose": "^5.12.10",
-    "slash-create": "3.3.0",
-    "tiktok-scraper": "^1.4.23",
+    "slash-create": "^4.0.1",
+    "tiktok-scraper": "^1.4.36",
     "winston": "^3.3.3"
   },
   "devDependencies": {

@@ -1,20 +1,20 @@
 const { SlashCreator, GatewayServer } = require('slash-create')
 const path = require('path')
 const Discord = require('discord.js')
+const { Intents } = Discord
 const mongoose = require('mongoose')
 const fs = require('fs')
-const { MessageButton } = require('discord-buttons')
 
 const TikTokParser = require('./modules/tiktok')
-const ServerSettings = require('./modules/mongo')
-const { tiktok, bot, status, owner, emojis } = require('./other/settings.json')
+const { ServerOptions, Download } = require('./modules/mongo')
+const { tiktok, bot, status, owner } = require('./other/settings.json')
 const { starters } = tiktok
 const log = require('./modules/log')
 const botInviteURL = require('./modules/invite')
+const { tikTokMessage } = require('./modules/messageGenerator')
 
 // Initialize the bot and slash commands
-const client = new Discord.Client()
-require('discord-buttons')(client)
+const client = new Discord.Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.DIRECT_MESSAGES] })
 const creator = new SlashCreator({
   applicationID: bot.id,
   publicKey: bot.publicKey,
@@ -31,6 +31,7 @@ creator
 
 // Whenever this is a slash-command error run this function...
 creator.on('commandError', async (command, error, interaction) => {
+  // TODO Replace entire function. This is dumb
   if (error) {
     log.error(`${error.message}`, { serverID: interaction.guildID })
   }
@@ -144,7 +145,10 @@ client.on('message', async message => {
   const channel = message.channel.permissionsFor(client.user).has('SEND_MESSAGES') ? message.channel : message.author
 
   // Get options for this server
-  const guildOptions = await ServerSettings.findOneAndUpdate({ serverID: message.guild.id }, {}, { upsert: true, new: true, setDefaultsOnInsert: true, useFindAndModify: false })
+  const guildOptions = await ServerOptions.findOneAndUpdate({ serverID: message.guild.id }, {}, { upsert: true, new: true, setDefaultsOnInsert: true, useFindAndModify: false })
+
+  // Check if this user or channel is banned
+  if (guildOptions.banned.channels.indexOf(message.channel.id) + guildOptions.banned.users.indexOf(message.author.id) !== -2) return
 
   // If they don't have autodownload enabled then return
   if (!guildOptions.autodownload.enabled) return
@@ -152,6 +156,22 @@ client.on('message', async message => {
   // Define some variables
   let videoStatus, statusMessage
   let statusUpdater = () => {}
+
+  // Create new download db entry
+  const thisDownload = new Download({
+    identity: {
+      userID: message.author.id,
+      serverID: message.guild.id,
+      interaction: false
+    },
+    time: {
+      timestamp: new Date()
+    },
+    video: {
+      url: tiktok
+    },
+    errorProcessing: false
+  })
 
   // If they have progress messages enabled, create the message and send it
   if (guildOptions.progress.enabled) {
@@ -167,12 +187,12 @@ client.on('message', async message => {
     }
 
     // Sending it
-    statusMessage = await channel.send({ embed: videoStatus })
+    statusMessage = await channel.send({ embeds: [videoStatus] })
 
     // Define status updater
     statusUpdater = (status) => {
       videoStatus.fields = status
-      statusMessage.edit({ embed: videoStatus })
+      statusMessage.edit({ embeds: [videoStatus] })
     }
   }
 
@@ -180,60 +200,22 @@ client.on('message', async message => {
   log.info(`📩 - Received Video: ${tiktok}`, { serverID: message.guild.id })
 
   // Get the video data
-  TikTokParser(tiktok, message.guild.id, statusUpdater).then(async videoData => {
+  TikTokParser(tiktok, message.guild.id, statusUpdater, thisDownload).then(async videoData => {
     // With the video data...
-
+    const requester = {
+      avatarURL: message.author.avatarURL(),
+      name: message.author.tag
+    }
     // Start making the message its going to send
-    const response = {
-      files: [videoData.videoPath]
-    }
-    const serverDetails = guildOptions.details
-
-    // If they have video details enabled...
-    if (serverDetails.enabled && (serverDetails.description || serverDetails.requester || serverDetails.author || serverDetails.analytics)) {
-      // Set the response embed to be the information they want
-      const [title, url] = serverDetails.link === 'embed' || serverDetails.link === 'both' ? ['View On TikTok', tiktok] : [undefined, undefined]
-
-      response.embed = {
-        title,
-        url,
-        description: serverDetails.description ? videoData.text : undefined,
-        timestamp: serverDetails.requester ? new Date().toISOString() : undefined,
-        color: guildOptions.color,
-        author: serverDetails.author
-          ? {
-              name: `${videoData.authorMeta.nickName} (${videoData.authorMeta.name})`,
-              icon_url: videoData.authorMeta.avatar
-            }
-          : undefined,
-        footer: serverDetails.requester
-          ? {
-              text: `Requested by ${message.author.tag}`,
-              icon_url: message.author.avatarURL()
-            }
-          : undefined,
-        fields: serverDetails.analytics
-          ? [
-              { name: ':arrow_forward: Plays', value: videoData.playCount, inline: true },
-              { name: ':heart: Likes', value: videoData.diggCount, inline: true },
-              { name: ':mailbox_with_mail: Shares', value: videoData.shareCount, inline: true }
-            ]
-          : undefined
-      }
-    }
-
-    response.buttons = (serverDetails.link === 'button' || serverDetails.link === 'both') && serverDetails.enabled
-      ? [new MessageButton()
-          .setLabel('View On TikTok')
-          .setStyle('url')
-          .setEmoji(emojis.tiktok.id)
-          .setURL(tiktok)]
-      : undefined
+    const response = tikTokMessage(videoData, guildOptions, requester)
+    response.files = [videoData.videoPath]
 
     // Wait for message to send...
     await channel.send(response).catch(err => {
       log.error(`⚠️ - ERROR SENDING VIDEO\n${err}`, { serverID: message.guild.id })
     })
+
+    thisDownload.time.timeTaken = new Date() - thisDownload.time.timestamp
 
     // If the message is deletable, and they have autodelete enabled, then...
     if (message.deletable && ((guildOptions.autodownload.deletemessage && guildOptions.autodownload.smartdelete && onlyTikTok) || (guildOptions.autodownload.deletemessage && !guildOptions.autodownload.smartdelete))) {
@@ -251,11 +233,19 @@ client.on('message', async message => {
 
     // Delete the local video file(s)
     videoData.purge()
+
+    // Save download information
+    thisDownload.save()
   }).catch(err => {
     // If theres an error...
     // Log error
     log.error(`⚠️ - ERROR PROCESSING VIDEO\n${err}`, { serverID: message.guild.id })
 
+    // Update download entry in database
+    thisDownload.errorProcessing = true
+    thisDownload.save()
+
+    // If there is a status message and it is deletable...
     if (statusMessage && statusMessage.deletable) {
       // Delete the status message if there is one
       statusMessage.delete()
@@ -266,7 +256,7 @@ client.on('message', async message => {
       .setTitle(':rotating_light: Error')
       .setColor('#ff0000')
       .setDescription('I couldn\'t download that video for some reason. Check to make sure the video link is valid.')
-      .setFooter(`Please contact \`${owner.tag}\` if you believe this is an error`)
+      .setFooter(`Please contact ${owner.tag} if you believe this is an error`)
     )
   })
 })

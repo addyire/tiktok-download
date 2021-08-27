@@ -1,9 +1,9 @@
-const Discord = require('discord.js')
+const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js')
 const { SlashCommand, ButtonStyle, ComponentType } = require('slash-create')
 
-const ServerOptions = require('../mongo')
+const { ServerOptions } = require('../mongo')
 const { version } = require('../../package.json')
-const { owner, emojis, helplink } = require('../../other/settings.json')
+const { owner, emojis, helplink, voteURL } = require('../../other/settings.json')
 const { tiktok, github, discord } = emojis
 const botInviteURL = require('../invite')
 const log = require('../log')
@@ -24,7 +24,7 @@ module.exports = class Help extends SlashCommand {
 
     const response = {}
 
-    response.embeds = [new Discord.MessageEmbed()
+    response.embeds = [new MessageEmbed()
       .setTitle('TokTik Downloader')
       .setURL(botInviteURL)
       .setDescription("This bot automagically replaces TikTok URL's with a MP4 file so you don't have to leave discord to watch it. \n*If you are being DM'd responses to commands make sure the bot has sufficient permissions to send messages in ALL channels.*")
@@ -39,36 +39,47 @@ module.exports = class Help extends SlashCommand {
         value: 'You can view the code [here](https://github.com/addyire/tiktok-download) on GitHub!'
       }, {
         name: 'Help',
-        value: `For any additional help you can join the [official help discord](${helplink}). You can also create an issue on GitHub!`
+        value: `For any additional help you can join the [official help discord]${helplink ? '(' + helplink + ')' : 'not linked'}. You can also create an issue on GitHub!`
       })
       .setColor(serverOptions.color)
       .setFooter(`Contact ${owner.tag} for any questions or help with this bot. | Version: ${version}`)
       .toJSON()
     ]
 
-    response.components = [{
-      components: [{
-        style: ButtonStyle.LINK,
-        type: ComponentType.BUTTON,
+    const buttons = [
+      new MessageButton({
+        style: 'LINK',
         label: 'GitHub',
         url: 'https://github.com/addyire/tiktok-download',
         emoji: github
-      }, {
-        style: ButtonStyle.LINK,
-        type: ComponentType.BUTTON,
+      }),
+      new MessageButton({
+        style: 'LINK',
         label: 'Invite',
         url: botInviteURL,
         emoji: tiktok
-      }, {
-        style: ButtonStyle.LINK,
-        type: ComponentType.BUTTON,
-        label: 'Help',
-        url: helplink,
-        emoji: discord
-      }],
-      type: ComponentType.ACTION_ROW
-    }]
+      })
+    ]
 
+    helplink && buttons.push(new MessageButton({
+      style: 'LINK',
+      label: 'Help',
+      url: helplink,
+      emoji: discord
+    }))
+
+    voteURL && buttons.push(new MessageButton({
+      style: 'LINK',
+      label: 'Vote',
+      emoji: '🗳️',
+      url: voteURL
+    }))
+    response.components = [
+      new MessageActionRow()
+        .addComponents(buttons)
+        .toJSON()
+    ]
+    
     interaction.send(response)
 
     log.info('Sent help information', { serverID: interaction.guildID })
