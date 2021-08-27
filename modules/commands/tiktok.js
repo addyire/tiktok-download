@@ -40,6 +40,8 @@ module.exports = class TikTok extends SlashCommand {
     if (serverOptions.banned.users.indexOf(interaction.user.id) !== -1) throw new Error('You have been banned from using me.')
     if (!testURL(args.url)) throw new Error('Not a valid URL')
 
+    log.info(`📩 - Processing Video: ${args.url}`, { serverID: interaction.guildID })
+
     const thisDownload = new Download({
       identity: {
         userID: interaction.user.id,
@@ -61,7 +63,7 @@ module.exports = class TikTok extends SlashCommand {
         name: `${interaction.user.username}#${interaction.user.discriminator}`
       }
 
-      const response = tikTokMessage(videoData, serverOptions, requester)
+      const response = tikTokMessage(videoData, serverOptions, requester, true)
       response.file = {
         name: 'tiktok.mp4',
         file: fs.readFileSync(videoData.videoPath)

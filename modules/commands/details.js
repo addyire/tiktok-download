@@ -1,9 +1,10 @@
-const { SlashCommand, ComponentType, ButtonStyle } = require('slash-create')
+const { SlashCommand } = require('slash-create')
+const { MessageActionRow, MessageButton } = require('discord.js')
 
 const { ServerOptions } = require('../mongo')
 const botInviteURL = require('../invite')
 const tiktokEmoji = require('../../other/settings.json').emojis.tiktok
-const { settingsChange } = require('../messageGenerator')
+const { settingsChange, tikTokMessage } = require('../messageGenerator')
 const log = require('../log')
 
 module.exports = class Details extends SlashCommand {
@@ -108,50 +109,25 @@ module.exports = class Details extends SlashCommand {
 
     log.info('Changed details', { serverID: interaction.guildID })
 
-    const detailSettings = serverOptions.details
-    const embeds = [settingsChange(args.enabled ? 'Here is a preview of what the details will look like next time I send a TikTok:' : 'Next time you request a TikTok, only the video will be sent.')]
+    // Create a tiktok message using dummy data
+    const preview = tikTokMessage({
+      videoURL: botInviteURL,
+      text: 'The video description will go here!',
+      authorMeta: {
+        name: 'Author Username',
+        nickName: 'Author Nick Name',
+        avatar: 'https://static.thenounproject.com/png/82455-200.png'
+      },
+      playCount: '5M',
+      diggCount: '600K',
+      shareCount: '100'
+    }, serverOptions, {
+      name: `${interaction.user.username}#${interaction.user.discriminator}`,
+      icon_url: interaction.user.avatarURL
+    }, true)
 
-    if (detailSettings.enabled && (detailSettings.description || detailSettings.requester || detailSettings.author || detailSettings.analytics)) {
-      embeds.push({
-        title: detailSettings.link === 'embed' || detailSettings.link === 'both' ? 'View On TikTok' : undefined,
-        description: detailSettings.description ? 'The description would go here!' : undefined,
-        timestamp: new Date().toISOString(),
-        color: parseInt(serverOptions.color.substring(1), 16),
-        author: detailSettings.author
-          ? {
-              name: 'Author Nick Name (Author Username)',
-              icon_url: 'https://static.thenounproject.com/png/82455-200.png'
-            }
-          : undefined,
-        footer: detailSettings.requester
-          ? {
-              text: `Requested by ${interaction.user.username}#${interaction.user.discriminator}`,
-              icon_url: interaction.user.avatarURL
-            }
-          : undefined,
-        fields: detailSettings.analytics
-          ? [
-              { name: ':arrow_forward: Plays', value: '69M', inline: true },
-              { name: ':speech_left: Comments', value: '999k', inline: true },
-              { name: ':mailbox_with_mail: Shares', value: '450', inline: true }
-            ]
-          : undefined
-      })
-    }
+    preview.embeds.splice(0, 0, settingsChange(args.enabled ? 'Here is a preview of what the details will look like next time I send a TikTok:' : 'Next time you request a TikTok, only the video will be sent.'))
 
-    const components = (detailSettings.link === 'button' || detailSettings.link === 'both') && detailSettings.enabled
-      ? [{
-          components: [{
-            style: ButtonStyle.LINK,
-            type: ComponentType.BUTTON,
-            label: 'View On TikTok',
-            url: botInviteURL,
-            emoji: tiktokEmoji
-          }],
-          type: ComponentType.ACTION_ROW
-        }]
-      : undefined
-
-    interaction.send({ embeds, components })
+    interaction.send(preview)
   }
 }

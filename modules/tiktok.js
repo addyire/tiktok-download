@@ -49,9 +49,6 @@ function processTikTok (videoURL, guildID, statusChange, downloadDoc) {
   return new Promise((resolve, reject) => {
     // Get video metaData then...
     TikTokScraper.getVideoMeta(videoURL, SETTINGS).then((videoMeta) => {
-      // Log status
-      log.info('📊 - Download Metadata', { serverID: guildID })
-
       // Store the headers for downloading the video
       const headers = videoMeta.headers
 
@@ -65,11 +62,8 @@ function processTikTok (videoURL, guildID, statusChange, downloadDoc) {
       returnInfo.shareCount = shortNum(returnInfo.shareCount)
       returnInfo.commentCount = shortNum(returnInfo.commentCount)
 
-      log.info('📲 - Downloading...', { serverID: guildID })
       return download(returnInfo.videoUrl, { headers }, returnInfo.videoPath)
     }).then(() => {
-      log.info('✅ - Download Complete!', { serverID: guildID })
-
       const videoSize = fs.statSync(returnInfo.videoPath).size
 
       // Update the video document
@@ -80,7 +74,6 @@ function processTikTok (videoURL, guildID, statusChange, downloadDoc) {
       if (videoSize > DISCORD_MAX_SIZE) {
         // If the servers does not have compression enabled...
         if (!hasCompression(guildID)) {
-          log.info('❌ - No Compression Permission', { serverID: guildID })
           // Update status message
           statusChange(STATUS.NOT_PERMITTED)
           // Throw an error
@@ -91,8 +84,6 @@ function processTikTok (videoURL, guildID, statusChange, downloadDoc) {
         statusChange(STATUS.COMPRESSING)
         // Store the start time
         const start = new Date().getTime()
-
-        log.info(`🧈 - Compression Required (${videoSize / 1000000}mb)`, { serverID: guildID })
 
         // Calculate stuff for the video
         const oldPath = returnInfo.videoPath
@@ -111,14 +102,11 @@ function processTikTok (videoURL, guildID, statusChange, downloadDoc) {
             reject(new Error('Failed to compress the video.')) // Throw a error which will be handled later
           })
           .on('end', () => { // Once compression is complete
-            log.info(`✅ - Compression FINISHED (${(new Date().getTime() - start) / 1000}s)`, { serverID: guildID })
-
             // Update the status message
             statusChange(STATUS.COMPLETE)
 
             // Define the videos purge function
             returnInfo.purge = () => {
-              log.info('🗑️ - Deleting Videos From Storage', { serverID: guildID })
               fs.unlinkSync(oldPath)
               fs.unlinkSync(newVideoPath)
             }
@@ -138,7 +126,6 @@ function processTikTok (videoURL, guildID, statusChange, downloadDoc) {
         // Set variables in the returnInfo
         returnInfo.videoName = `${videoID}.mp4`
         returnInfo.purge = () => {
-          log.info('🗑️ - Deleting Video From Storage', { serverID: guildID })
           fs.unlinkSync(returnInfo.videoPath)
         }
 

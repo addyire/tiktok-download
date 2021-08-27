@@ -1,7 +1,7 @@
 const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js')
 const { emojis } = require('../other/settings.json')
 
-function tikTokMessage (videoData, guildSettings, requester) {
+function tikTokMessage (videoData, guildSettings, requester, interaction = false) {
   // Create response
   const tiktok = videoData.videoURL
   const response = {}
@@ -39,7 +39,7 @@ function tikTokMessage (videoData, guildSettings, requester) {
           ]
         : undefined
     }]
-  } else {
+  } else if (interaction) {
     response.embeds = [{
       description: 'Here\'s your video',
       color: parseInt(guildSettings.color.substring(1), 16)

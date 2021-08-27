@@ -197,7 +197,7 @@ client.on('message', async message => {
   }
 
   // Log that the bot got a request for a video
-  log.info(`📩 - Received Video: ${tiktok}`, { serverID: message.guild.id })
+  log.info(`📩 - Processing Video: ${tiktok}`, { serverID: message.guild.id })
 
   // Get the video data
   TikTokParser(tiktok, message.guild.id, statusUpdater, thisDownload).then(async videoData => {
@@ -219,14 +219,12 @@ client.on('message', async message => {
 
     // If the message is deletable, and they have autodelete enabled, then...
     if (message.deletable && ((guildOptions.autodownload.deletemessage && guildOptions.autodownload.smartdelete && onlyTikTok) || (guildOptions.autodownload.deletemessage && !guildOptions.autodownload.smartdelete))) {
-      log.info('🗑️ - Deleting Original Message', { serverID: message.guild.id })
       // Delete the video
       message.delete()
     }
 
     // If there was a status message...
     if (statusMessage && statusMessage.deletable) {
-      log.info('🗑️ - Deleting Status Message', { serverID: message.guild.id })
       // Delete the status messsage.
       statusMessage.delete()
     }
