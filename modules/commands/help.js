@@ -1,5 +1,5 @@
 const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js')
-const { SlashCommand, ButtonStyle, ComponentType } = require('slash-create')
+const { SlashCommand } = require('slash-create')
 
 const { ServerOptions } = require('../mongo')
 const { version } = require('../../package.json')
@@ -79,7 +79,7 @@ module.exports = class Help extends SlashCommand {
         .addComponents(buttons)
         .toJSON()
     ]
-    
+
     interaction.send(response)
 
     log.info('Sent help information', { serverID: interaction.guildID })

@@ -8,6 +8,9 @@ Discord bot that automatically downloads TikToks<br>
 
 </div>
 
+## Usage
+
+To use this bot simply add it to your server and do / to see all available commands. 
 ## Features
 
 - Compression
@@ -36,5 +39,6 @@ git clone https://github.com/addyire/tiktok-download
 cd tiktok-download
 npm install
 ```
-2. Create a `other/settings.json` file using the `settings.example.json` as reference.
-3. Run with `npm start`
+2. Have a mongoDB instance running
+3. Create a `other/settings.json` file using the `settings.example.json` as reference.
+4. Run with `npm start`

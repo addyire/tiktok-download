@@ -90,7 +90,7 @@ function settingsChange (message) {
   const res = new MessageEmbed()
 
   // Set the title and description
-  res.setTitle(':gear: Settings Updated')
+  res.setTitle(':tools: Settings Changed')
   res.setDescription(message)
 
   // Turn the embed into json and return
