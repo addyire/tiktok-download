@@ -1,6 +1,6 @@
 const { SlashCommand } = require('slash-create')
 
-const ServerOptions = require('../mongo')
+const { ServerOptions } = require('../mongo')
 const botInviteURL = require('../invite')
 const log = require('../log')
 const { settingsChange } = require('../messageGenerator')
@@ -28,7 +28,7 @@ module.exports = class SetColor extends SlashCommand {
     let hasPerms
 
     try {
-      hasPerms = (await this.client.guilds.cache.get(interaction.guildID).members.fetch(interaction.user.id)).hasPermission('ADMINISTRATOR')
+      hasPerms = (await (await this.client.guilds.fetch(interaction.guildID)).members.fetch(interaction.user.id)).permissions.has('ADMINISTRATOR')
     } catch (err) {
       throw new Error(`I am not in this server as a bot. Please have an administrator click [this](${botInviteURL}) link to invite me.`)
     }
