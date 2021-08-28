@@ -7,11 +7,12 @@ const fs = require('fs')
 
 const TikTokParser = require('./modules/tiktok')
 const { ServerOptions, Download } = require('./modules/mongo')
-const { tiktok, bot, status, owner } = require('./other/settings.json')
-const { starters } = tiktok
+const { bot, status, owner } = require('./other/settings.json')
 const log = require('./modules/log')
 const botInviteURL = require('./modules/invite')
 const { tikTokMessage } = require('./modules/messageGenerator')
+
+const STARTERS = ['https://vm.tiktok.com/', 'http://vm.tiktok.com/', 'https://www.tiktok.com/', 'http://www.tiktok.com/', 'https://m.tiktok.com/v/', 'http://m.tiktok.com/v/', 'https://vt.tiktok.com/', 'http://vt.tiktok.com/']
 
 // Initialize the bot and slash commands
 const client = new Discord.Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.DIRECT_MESSAGES] })
@@ -265,7 +266,7 @@ function getTikTokFromStr (msg) {
   // Split the string and for each element...
   for (const element of msg.split(' ')) {
     // Loop through all the possible tiktok video starters...
-    for (const starter of starters) {
+    for (const starter of STARTERS) {
       // If there is a match then return the item of the first array
       if (element.startsWith(starter)) return element
     }
