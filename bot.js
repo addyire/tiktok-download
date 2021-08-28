@@ -1,7 +1,7 @@
 const { SlashCreator, GatewayServer } = require('slash-create')
 const path = require('path')
 const Discord = require('discord.js')
-const { Intents } = Discord
+const { FLAGS } = Discord.Intents
 const mongoose = require('mongoose')
 const fs = require('fs')
 
@@ -15,7 +15,7 @@ const { tikTokMessage } = require('./modules/messageGenerator')
 const STARTERS = ['https://vm.tiktok.com/', 'http://vm.tiktok.com/', 'https://www.tiktok.com/', 'http://www.tiktok.com/', 'https://m.tiktok.com/v/', 'http://m.tiktok.com/v/', 'https://vt.tiktok.com/', 'http://vt.tiktok.com/']
 
 // Initialize the bot and slash commands
-const client = new Discord.Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.DIRECT_MESSAGES] })
+const client = new Discord.Client({ intents: [FLAGS.GUILDS, FLAGS.GUILD_MESSAGES, FLAGS.DIRECT_MESSAGES] })
 const creator = new SlashCreator({
   applicationID: bot.id,
   publicKey: bot.publicKey,

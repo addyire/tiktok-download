@@ -82,8 +82,6 @@ function processTikTok (videoURL, guildID, statusChange, downloadDoc) {
 
         // Update the status message
         statusChange(STATUS.COMPRESSING)
-        // Store the start time
-        const start = new Date().getTime()
 
         // Calculate stuff for the video
         const oldPath = returnInfo.videoPath

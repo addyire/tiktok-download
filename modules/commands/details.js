@@ -1,9 +1,7 @@
 const { SlashCommand } = require('slash-create')
-const { MessageActionRow, MessageButton } = require('discord.js')
 
 const { ServerOptions } = require('../mongo')
 const botInviteURL = require('../invite')
-const tiktokEmoji = require('../../other/settings.json').emojis.tiktok
 const { settingsChange, tikTokMessage } = require('../messageGenerator')
 const log = require('../log')
 

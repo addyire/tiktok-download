@@ -1,10 +1,9 @@
 {
   "name": "tiktok-download",
-  "version": "2.2b",
+  "version": "2.2.0",
   "main": "bot.js",
   "license": "MIT",
   "dependencies": {
-    "discord-buttons": "^4.0.0",
     "discord.js": "^13.1.0",
     "ffmpeg-static": "^4.3.0",
     "fluent-ffmpeg": "^2.1.2",
