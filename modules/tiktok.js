@@ -190,7 +190,7 @@ function shortNum (num) {
     return num / 1000000 + 'M'
   } else if (num >= 1000) {
     return num / 1000 + 'K'
-  } else return num
+  } else return String(num)
 }
 
 module.exports = processTikTok
