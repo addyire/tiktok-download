@@ -80,16 +80,6 @@ const serverSchema = new mongoose.Schema({
     },
     default: '#FF00FF'
   },
-  limiter: {
-    pastDownloads: [{
-      paid: Boolean,
-      compressed: Boolean
-    }],
-    paidDownloads: {
-      type: Number,
-      default: 0
-    }
-  },
   banned: {
     users: {
       type: [String],
@@ -106,31 +96,8 @@ const serverSchema = new mongoose.Schema({
 // Load schema
 const ServerOptions = mongoose.model('server', serverSchema)
 
-// Create tiktok schema
-const downloadSchema = new mongoose.Schema({
-  identity: {
-    userID: String,
-    serverID: String,
-    interaction: Boolean
-  },
-  time: {
-    timestamp: Date,
-    timeTaken: Number
-  },
-  video: {
-    url: String,
-    size: Number,
-    postCompressSize: Number,
-    compressed: Boolean
-  },
-  errorProcessing: Boolean
-})
-
-//
-const Download = mongoose.model('downloads', downloadSchema)
-
 // Export schema
-module.exports = { ServerOptions, Download }
+module.exports = { ServerOptions }
 
 // Log database events
 mongoose.connection.on('connected', () => {

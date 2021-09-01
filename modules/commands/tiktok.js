@@ -1,7 +1,7 @@
 const { SlashCommand } = require('slash-create')
 const fs = require('fs')
 
-const { ServerOptions, Download } = require('../mongo')
+const { ServerOptions } = require('../mongo')
 const TikTokParser = require('../tiktok')
 const { owner } = require('../../other/settings.json')
 const log = require('../log')
@@ -42,22 +42,7 @@ module.exports = class TikTok extends SlashCommand {
 
     log.info(`📩 - Processing Video: ${args.url}`, { serverID: interaction.guildID })
 
-    const thisDownload = new Download({
-      identity: {
-        userID: interaction.user.id,
-        serverID: interaction.guildID,
-        interaction: true
-      },
-      time: {
-        timestamp: new Date()
-      },
-      video: {
-        url: args.url
-      },
-      errorProcessing: false
-    })
-
-    TikTokParser(args.url, interaction.guildID, () => {}, thisDownload).then(videoData => {
+    TikTokParser(args.url, interaction.guildID, () => {}).then(videoData => {
       const requester = {
         avatarURL: interaction.user.avatarURL,
         name: `${interaction.user.username}#${interaction.user.discriminator}`
@@ -72,9 +57,6 @@ module.exports = class TikTok extends SlashCommand {
       interaction.send(response).then(() => {
         videoData.purge()
       })
-
-      thisDownload.time.timeTaken = thisDownload.time.timestamp
-      thisDownload.save()
     }).catch(err => {
       log.warn('Encountered this error while downloading video with interaction' + err, { serverID: interaction.guildID })
 
@@ -88,9 +70,6 @@ module.exports = class TikTok extends SlashCommand {
       }
 
       interaction.send({ embeds: [e] })
-
-      thisDownload.errorProcessing = true
-      thisDownload.save()
     })
   }
 }

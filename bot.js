@@ -6,7 +6,7 @@ const mongoose = require('mongoose')
 const fs = require('fs')
 
 const TikTokParser = require('./modules/tiktok')
-const { ServerOptions, Download } = require('./modules/mongo')
+const { ServerOptions } = require('./modules/mongo')
 const { bot, status, owner } = require('./other/settings.json')
 const log = require('./modules/log')
 const botInviteURL = require('./modules/invite')
@@ -158,22 +158,6 @@ client.on('message', async message => {
   let videoStatus, statusMessage
   let statusUpdater = () => {}
 
-  // Create new download db entry
-  const thisDownload = new Download({
-    identity: {
-      userID: message.author.id,
-      serverID: message.guild.id,
-      interaction: false
-    },
-    time: {
-      timestamp: new Date()
-    },
-    video: {
-      url: tiktok
-    },
-    errorProcessing: false
-  })
-
   // If they have progress messages enabled, create the message and send it
   if (guildOptions.progress.enabled) {
     // Creating the message
@@ -201,7 +185,7 @@ client.on('message', async message => {
   log.info(`📩 - Processing Video: ${tiktok}`, { serverID: message.guild.id })
 
   // Get the video data
-  TikTokParser(tiktok, message.guild.id, statusUpdater, thisDownload).then(async videoData => {
+  TikTokParser(tiktok, message.guild.id, statusUpdater).then(async videoData => {
     // With the video data...
     const requester = {
       avatarURL: message.author.avatarURL(),
@@ -215,8 +199,6 @@ client.on('message', async message => {
     await channel.send(response).catch(err => {
       log.error(`⚠️ - ERROR SENDING VIDEO\n${err}`, { serverID: message.guild.id })
     })
-
-    thisDownload.time.timeTaken = new Date() - thisDownload.time.timestamp
 
     // If the message is deletable, and they have autodelete enabled, then...
     if (message.deletable && ((guildOptions.autodownload.deletemessage && guildOptions.autodownload.smartdelete && onlyTikTok) || (guildOptions.autodownload.deletemessage && !guildOptions.autodownload.smartdelete))) {
@@ -232,17 +214,10 @@ client.on('message', async message => {
 
     // Delete the local video file(s)
     videoData.purge()
-
-    // Save download information
-    thisDownload.save()
   }).catch(err => {
     // If theres an error...
     // Log error
     log.error(`⚠️ - ERROR PROCESSING VIDEO\n${err}`, { serverID: message.guild.id })
-
-    // Update download entry in database
-    thisDownload.errorProcessing = true
-    thisDownload.save()
 
     // If there is a status message and it is deletable...
     if (statusMessage && statusMessage.deletable) {
