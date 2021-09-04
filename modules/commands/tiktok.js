@@ -62,7 +62,7 @@ module.exports = class TikTok extends SlashCommand {
 
       const e = {
         title: ':rotating_light: Error',
-        description: "I couldn't download that video for some reason. Check to make sure the video link is valid.",
+        description: "I couldn't download that video for some reason. Check to make sure the video is not private.",
         color: parseInt('FF0000', 16),
         footer: {
           text: `Please contact ${owner.tag} if you believe this is an error`

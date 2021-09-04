@@ -172,7 +172,9 @@ client.on('message', async message => {
     }
 
     // Sending it
-    statusMessage = await channel.send({ embeds: [videoStatus] })
+    statusMessage = await channel.send({ embeds: [videoStatus] }).catch(err => {
+      console.error('FUWOHBWUIRFNWUFW', err)
+    })
 
     // Define status updater
     statusUpdater = (status) => {
@@ -194,6 +196,8 @@ client.on('message', async message => {
     // Start making the message its going to send
     const response = tikTokMessage(videoData, guildOptions, requester)
     response.files = [videoData.videoPath]
+
+    console.log(response, 'resp')
 
     // Wait for message to send...
     await channel.send(response).catch(err => {
@@ -226,12 +230,14 @@ client.on('message', async message => {
     }
 
     // Send user the error message
-    channel.send(new Discord.MessageEmbed()
-      .setTitle(':rotating_light: Error')
-      .setColor('#ff0000')
-      .setDescription('I couldn\'t download that video for some reason. Check to make sure the video link is valid.')
-      .setFooter(`Please contact ${owner.tag} if you believe this is an error`)
-    )
+    channel.send({
+      embeds: [new Discord.MessageEmbed()
+        .setTitle(':rotating_light: Error')
+        .setColor('#ff0000')
+        .setDescription('I couldn\'t download that video for some reason. Check to make sure the video is not private.')
+        .setFooter(`Please contact ${owner.tag} if you believe this is an error`)
+      ]
+    })
   })
 })
 

@@ -55,9 +55,9 @@ module.exports = class Progress extends SlashCommand {
       return a
     }, {})
 
-    serverOptions.autodownload.enabled = args.enabled
-    serverOptions.autodownload.deletemessage = args.deletemessage
-    serverOptions.autodownload.smartdelete = args.smartdelete
+    serverOptions.autodownload.enabled = args.enabled !== undefined ? args.enabled : serverOptions.autodownload.enabled
+    serverOptions.autodownload.deletemessage = args.deletemessage !== undefined ? args.deletemessage : serverOptions.autodownload.deletemessage
+    serverOptions.autodownload.smartdelete = args.smartdelete !== undefined ? args.smartdelete : serverOptions.autodownload.smartdelete
 
     log.info('Changed auto download settings', { serverID: interaction.guildID })
 
