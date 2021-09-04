@@ -172,9 +172,7 @@ client.on('message', async message => {
     }
 
     // Sending it
-    statusMessage = await channel.send({ embeds: [videoStatus] }).catch(err => {
-      console.error('FUWOHBWUIRFNWUFW', err)
-    })
+    statusMessage = await channel.send({ embeds: [videoStatus] })
 
     // Define status updater
     statusUpdater = (status) => {
@@ -196,8 +194,6 @@ client.on('message', async message => {
     // Start making the message its going to send
     const response = tikTokMessage(videoData, guildOptions, requester)
     response.files = [videoData.videoPath]
-
-    console.log(response, 'resp')
 
     // Wait for message to send...
     await channel.send(response).catch(err => {
