@@ -70,6 +70,10 @@ const serverSchema = new mongoose.Schema({
     smart: {
       type: Boolean,
       default: true
+    },
+    displayErrors: {
+      type: Boolean,
+      default: true
     }
   },
   color: {

@@ -225,15 +225,18 @@ client.on('message', async message => {
       statusMessage.delete()
     }
 
-    // Send user the error message
-    channel.send({
-      embeds: [new Discord.MessageEmbed()
-        .setTitle(':rotating_light: Error')
-        .setColor('#ff0000')
-        .setDescription('I couldn\'t download that video for some reason. Check to make sure the video is not private.')
-        .setFooter(`Please contact ${owner.tag} if you believe this is an error`)
-      ]
-    })
+    // Check if they want errors to be displayed
+    if (guildOptions.autodownload.displayErrors) {
+      // Send user the error message
+      channel.send({
+        embeds: [new Discord.MessageEmbed()
+          .setTitle(':rotating_light: Error')
+          .setColor('#ff0000')
+          .setDescription('I couldn\'t download that video for some reason. Check to make sure the video is not private.')
+          .setFooter(`Please contact ${owner.tag} if you believe this is an error`)
+        ]
+      })
+    }
   })
 })
 

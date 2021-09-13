@@ -28,6 +28,12 @@ module.exports = class Progress extends SlashCommand {
           name: 'smartdelete',
           description: 'When enabled, the message will not be deleted if there is more than just the URL in it.',
           required: false
+        },
+        {
+          type: 5,
+          name: 'errors',
+          description: 'When disabled, no error message will be sent when a tiktok cannot be downloaded for whatever reason.',
+          required: false
         }
       ]
     })
@@ -58,6 +64,7 @@ module.exports = class Progress extends SlashCommand {
     serverOptions.autodownload.enabled = args.enabled !== undefined ? args.enabled : serverOptions.autodownload.enabled
     serverOptions.autodownload.deletemessage = args.deletemessage !== undefined ? args.deletemessage : serverOptions.autodownload.deletemessage
     serverOptions.autodownload.smartdelete = args.smartdelete !== undefined ? args.smartdelete : serverOptions.autodownload.smartdelete
+    serverOptions.autodownload.displayErrors = args.errors !== undefined ? args.errors : serverOptions.autodownload.displayErrors
 
     log.info('Changed auto download settings', { serverID: interaction.guildID })
 
